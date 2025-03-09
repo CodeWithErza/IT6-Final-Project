@@ -14,8 +14,19 @@ check_login();
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/ERC-POS/assets/css/style.css">
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
+    <!-- Debug output -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Bootstrap version:', bootstrap.Collapse.VERSION);
+        console.log('jQuery version:', jQuery.fn.jquery);
+    });
+    </script>
     <!-- Top Header Bar -->
     <header class="navbar navbar-light fixed-top header-bar">
         <div class="d-flex justify-content-end align-items-center w-100 header-content">

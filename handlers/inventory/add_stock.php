@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 // Validate input
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['error'] = 'Invalid request method';
-    header('Location: /ERC-POS/views/inventory/index.php');
+    header('Location: /ERC-POS/views/inventory/stock_in.php');
     exit;
 }
 
@@ -23,16 +23,12 @@ $invoice_number = $_POST['invoice_number'] ?? '';
 $supplier = $_POST['supplier'] ?? '';
 $notes = $_POST['notes'] ?? '';
 
-// Build notes with additional information
-$transaction_notes = [];
-if ($supplier) $transaction_notes[] = "Supplier: $supplier";
-if ($invoice_number) $transaction_notes[] = "OR/Invoice #: $invoice_number";
-if ($notes) $transaction_notes[] = $notes;
-$final_notes = implode(" | ", $transaction_notes);
+// Keep notes as just notes, don't add supplier and invoice info
+$final_notes = $notes;
 
 if (empty($menu_item_id) || empty($quantity) || !is_numeric($quantity) || $quantity <= 0) {
     $_SESSION['error'] = 'Invalid input data';
-    header('Location: /ERC-POS/views/inventory/index.php');
+    header('Location: /ERC-POS/views/inventory/stock_in.php');
     exit;
 }
 
@@ -42,15 +38,28 @@ try {
         throw new Exception("Could not start transaction");
     }
 
-    // First, check if the inventory_transactions table has the unit_price column
-    $stmt = $conn->prepare("SHOW COLUMNS FROM inventory_transactions LIKE 'unit_price'");
-    $stmt->execute();
-    $column_exists = $stmt->fetch();
+    // Get current stock
+    $stmt = $conn->prepare("
+        SELECT COALESCE(
+            (SELECT SUM(
+                CASE 
+                    WHEN transaction_type = 'stock_in' THEN quantity
+                    WHEN transaction_type = 'stock_out' THEN -quantity
+                    WHEN transaction_type = 'adjustment' AND notes LIKE '%Increase%' THEN quantity
+                    WHEN transaction_type = 'adjustment' AND notes LIKE '%Decrease%' THEN -quantity
+                    WHEN transaction_type = 'adjustment' THEN quantity
+                END
+            )
+            FROM inventory_transactions 
+            WHERE menu_item_id = :menu_item_id
+            ), 0
+        ) as current_stock
+    ");
+    $stmt->execute([':menu_item_id' => $menu_item_id]);
+    $current_stock = $stmt->fetchColumn();
 
-    if (!$column_exists) {
-        // Add the unit_price column if it doesn't exist
-        $conn->exec("ALTER TABLE inventory_transactions ADD COLUMN unit_price DECIMAL(10,2) DEFAULT NULL AFTER quantity");
-    }
+    // Calculate new stock level
+    $new_stock = $current_stock + $quantity;
 
     // Insert inventory transaction
     $stmt = $conn->prepare("
@@ -59,6 +68,8 @@ try {
             transaction_type,
             quantity,
             unit_price,
+            supplier,
+            invoice_number,
             notes,
             created_by,
             created_at
@@ -67,6 +78,8 @@ try {
             'stock_in',
             :quantity,
             :unit_price,
+            :supplier,
+            :invoice_number,
             :notes,
             :created_by,
             :created_at
@@ -77,9 +90,23 @@ try {
         ':menu_item_id' => $menu_item_id,
         ':quantity' => $quantity,
         ':unit_price' => $unit_price,
+        ':supplier' => $supplier,
+        ':invoice_number' => $invoice_number,
         ':notes' => $final_notes,
         ':created_by' => $_SESSION['user_id'],
         ':created_at' => $transaction_date
+    ]);
+
+    // Update the menu_item's current_stock directly
+    $stmt = $conn->prepare("
+        UPDATE menu_items
+        SET current_stock = :new_stock
+        WHERE id = :menu_item_id
+    ");
+    
+    $stmt->execute([
+        ':new_stock' => $new_stock,
+        ':menu_item_id' => $menu_item_id
     ]);
 
     // Commit transaction
@@ -96,4 +123,4 @@ try {
     $_SESSION['error'] = 'Error adding stock: ' . $e->getMessage();
 }
 
-header('Location: /ERC-POS/views/inventory/index.php'); 
+header('Location: /ERC-POS/views/inventory/stock_in.php'); 

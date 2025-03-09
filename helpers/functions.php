@@ -90,12 +90,15 @@ function get_sales_report($start_date, $end_date) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function get_expenses_report($start_date, $end_date) {
-    global $conn;
-    $stmt = $conn->prepare("CALL sp_get_expenses_report(?, ?)");
-    $stmt->execute([$start_date, $end_date]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+// This function has been commented out as we now track inventory expenses through inventory_transactions
+// function get_expenses_report($start_date, $end_date) {
+//     global $conn;
+//     $stmt = $conn->prepare("CALL sp_get_expenses_report(?, ?)");
+//     $stmt->bindParam(1, $start_date);
+//     $stmt->bindParam(2, $end_date);
+//     $stmt->execute();
+//     return $stmt->fetchAll();
+// }
 
 function get_inventory_transactions($start_date, $end_date, $menu_item_id = null) {
     global $conn;

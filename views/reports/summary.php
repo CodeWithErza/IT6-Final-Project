@@ -35,7 +35,7 @@ $expenses_query = "
         COUNT(*) as transaction_count
     FROM inventory_transactions it
     LEFT JOIN menu_items mi ON it.menu_item_id = mi.id
-    WHERE it.transaction_type IN ('stock_in', 'initial')
+    WHERE it.transaction_type IN ('stock_in', 'adjustment')
     AND DATE(it.created_at) BETWEEN :start_date AND :end_date
     GROUP BY DATE(it.created_at)
     ORDER BY date DESC
@@ -129,7 +129,7 @@ $net_profit = $total_sales - $total_expenses;
             <div class="card bg-danger text-white mb-4 shadow-sm">
                 <div class="card-body">
                     <h4 class="mb-0">₱<?php echo number_format($total_expenses, 2); ?></h4>
-                    <div class="small">Total Expenses</div>
+                    <div class="small">Total Inventory Expenses</div>
                 </div>
             </div>
         </div>
@@ -202,7 +202,7 @@ $net_profit = $total_sales - $total_expenses;
                         <tr>
                             <th>Date</th>
                             <th>Sales</th>
-                            <th>Expenses</th>
+                            <th>Inventory Expenses</th>
                             <th>Profit</th>
                             <th>Orders</th>
                             <th>Profit Margin</th>

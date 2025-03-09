@@ -1,6 +1,10 @@
 <?php
 $current_page = basename($_SERVER['PHP_SELF'], '.php');
 $current_dir = basename(dirname($_SERVER['PHP_SELF']));
+
+// Debug output
+echo "<!-- Debug: current_page = " . htmlspecialchars($current_page) . " -->\n";
+echo "<!-- Debug: current_dir = " . htmlspecialchars($current_dir) . " -->\n";
 ?>
 
 <nav id="sidebar" class="col-md-2 col-lg-2 d-md-block sidebar">
@@ -28,29 +32,10 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             </li>
             <li class="nav-item">
                 <a class="nav-link <?php echo $current_dir === 'menu' ? 'active' : ''; ?>" 
-                   href="#menuSubmenu" 
-                   data-bs-toggle="collapse" 
-                   aria-expanded="<?php echo $current_dir === 'menu' ? 'true' : 'false'; ?>">
+                   href="/ERC-POS/views/menu/index.php">
                     <i class="fas fa-utensils me-2"></i>
-                    Menu
-                    <i class="fas fa-chevron-down float-end"></i>
+                    Menu Items
                 </a>
-                <ul class="nav collapse <?php echo $current_dir === 'menu' ? 'show' : ''; ?>" id="menuSubmenu">
-                    <li class="nav-item">
-                        <a class="nav-link ms-3 <?php echo $current_page === 'index' && $current_dir === 'menu' ? 'active' : ''; ?>" 
-                           href="/ERC-POS/views/menu/index.php">
-                            <i class="fas fa-list me-2"></i>
-                            List View
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link ms-3 <?php echo $current_page === 'categories' ? 'active' : ''; ?>" 
-                           href="/ERC-POS/views/menu/categories.php">
-                            <i class="fas fa-th-large me-2"></i>
-                            Categories View
-                        </a>
-                    </li>
-                </ul>
             </li>
             <li class="nav-item">
                 <a class="nav-link <?php echo $current_dir === 'orders' ? 'active' : ''; ?>" 
@@ -77,10 +62,31 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link ms-3 <?php echo $current_page === 'stock_in' ? 'active' : ''; ?>" 
+                           href="/ERC-POS/views/inventory/stock_in.php">
+                            <i class="fas fa-arrow-circle-down me-2"></i>
+                            Stock In
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link ms-3 <?php echo $current_page === 'stock_out' ? 'active' : ''; ?>" 
+                           href="/ERC-POS/views/inventory/stock_out.php">
+                            <i class="fas fa-arrow-circle-up me-2"></i>
+                            Stock Out
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link ms-3 <?php echo $current_page === 'stock_adjustment' ? 'active' : ''; ?>" 
+                           href="/ERC-POS/views/inventory/stock_adjustment.php">
+                            <i class="fas fa-balance-scale me-2"></i>
+                            Stock Adjustment
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link ms-3 <?php echo $current_page === 'history' ? 'active' : ''; ?>" 
                            href="/ERC-POS/views/inventory/history.php">
                             <i class="fas fa-history me-2"></i>
-                            Stock History
+                            All Transactions
                         </a>
                     </li>
                 </ul>
@@ -213,4 +219,28 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
         margin-left: 220px;
     }
 }
-</style> 
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Log current page and directory
+    console.log('Current Page:', '<?php echo $current_page; ?>');
+    console.log('Current Directory:', '<?php echo $current_dir; ?>');
+    
+    // Add click event listeners to all submenu toggles
+    document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function(element) {
+        element.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Menu clicked:', this.getAttribute('href'));
+            const targetId = this.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            console.log('Target element:', targetElement);
+            if (targetElement) {
+                const bsCollapse = new bootstrap.Collapse(targetElement, {
+                    toggle: true
+                });
+            }
+        });
+    });
+});
+</script> 

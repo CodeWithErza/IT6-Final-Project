@@ -39,20 +39,21 @@ BEGIN
 END //
 
 -- Get expenses report by date range
-CREATE PROCEDURE sp_get_expenses_report(
-    IN p_start_date DATE,
-    IN p_end_date DATE
-)
-BEGIN
-    SELECT 
-        DATE(expense_date) as expense_date,
-        SUM(amount) as total_amount,
-        COUNT(*) as transaction_count
-    FROM expenses
-    WHERE expense_date BETWEEN p_start_date AND p_end_date
-    GROUP BY DATE(expense_date)
-    ORDER BY expense_date;
-END //
+-- This procedure has been removed as we now track inventory expenses through inventory_transactions
+-- CREATE PROCEDURE sp_get_expenses_report(
+--     IN p_start_date DATE,
+--     IN p_end_date DATE
+-- )
+-- BEGIN
+--     SELECT 
+--         DATE(expense_date) as expense_date,
+--         SUM(amount) as total_amount,
+--         COUNT(*) as transaction_count
+--     FROM expenses
+--     WHERE expense_date BETWEEN p_start_date AND p_end_date
+--     GROUP BY DATE(expense_date)
+--     ORDER BY expense_date;
+-- END //
 
 -- Update inventory stock
 CREATE PROCEDURE sp_update_inventory_stock(
@@ -79,7 +80,7 @@ BEGIN
         UPDATE menu_items 
         SET current_stock = current_stock - p_quantity
         WHERE id = p_menu_item_id;
-    ELSE -- adjustment
+    ELSEIF p_transaction_type = 'adjustment' THEN
         UPDATE menu_items 
         SET current_stock = p_quantity
         WHERE id = p_menu_item_id;

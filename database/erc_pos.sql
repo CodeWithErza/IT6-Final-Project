@@ -95,7 +95,7 @@ CREATE TABLE order_items (
 CREATE TABLE inventory_transactions (
     id INT PRIMARY KEY AUTO_INCREMENT,
     menu_item_id INT NOT NULL,
-    transaction_type ENUM('in', 'out') NOT NULL,
+    transaction_type ENUM('stock_in', 'stock_out', 'adjustment') NOT NULL,
     quantity INT NOT NULL,
     unit_price DECIMAL(10,2) DEFAULT NULL,
     notes TEXT,

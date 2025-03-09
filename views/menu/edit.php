@@ -114,6 +114,18 @@ unset($_SESSION['error'], $_SESSION['success']);
                             </div>
                         </div>
 
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="is_active" 
+                                       name="is_active" value="1" 
+                                       <?php echo $menu_item['is_active'] ? 'checked' : ''; ?>>
+                                <label class="form-check-label" for="is_active">Active</label>
+                                <small class="text-muted d-block">
+                                    Inactive items will not appear in the menu or POS system
+                                </small>
+                            </div>
+                        </div>
+
                         <?php if ($menu_item['is_inventory_item']): ?>
                         <div class="mb-3" id="stock_adjustment_div">
                             <label for="stock_adjustment" class="form-label">Stock Adjustment</label>

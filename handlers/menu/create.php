@@ -93,7 +93,7 @@ try {
             $stmt = $conn->prepare("
                 INSERT INTO inventory_transactions 
                 (menu_item_id, transaction_type, quantity, notes, created_by)
-                VALUES (?, 'initial', ?, 'Initial stock', ?)
+                VALUES (?, 'stock_in', ?, 'Initial stock setup', ?)
             ");
             $stmt->execute([$menu_item_id, $initial_stock, $_SESSION['user_id']]);
         }

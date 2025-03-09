@@ -88,10 +88,17 @@ unset($_SESSION['success'], $_SESSION['error']);
                                                 <?php echo $item['current_stock'] <= 0 ? 'Out of Stock' : 'In Stock'; ?>
                                             </div>
                                         <?php endif; ?>
-                                        <img src="<?php echo !empty($item['image_path']) ? $item['image_path'] : 'assets/images/default-food.jpg'; ?>" 
+                                        <img src="<?php 
+                                            $image_path = !empty($item['image_path']) ? $item['image_path'] : 'assets/images/default-food.jpg';
+                                            // Add leading slash if not present
+                                            if (strpos($image_path, '/') !== 0) {
+                                                $image_path = '/' . $image_path;
+                                            }
+                                            echo '/ERC-POS' . $image_path;
+                                        ?>" 
                                              class="card-img-top menu-item-image" 
                                              alt="<?php echo htmlspecialchars($item['name']); ?>"
-                                             onerror="this.src='assets/images/default-food.jpg'">
+                                             onerror="this.src='/ERC-POS/assets/images/default-food.jpg'">
                                         <div class="card-body p-2">
                                             <h6 class="card-title mb-1"><?php echo htmlspecialchars($item['name']); ?></h6>
                                             <p class="card-text price mb-0">₱<?php echo number_format($item['price'], 2); ?></p>
@@ -123,10 +130,17 @@ unset($_SESSION['success'], $_SESSION['error']);
                                                         <?php echo $item['current_stock'] <= 0 ? 'Out of Stock' : 'In Stock'; ?>
                                                     </div>
                                                 <?php endif; ?>
-                                                <img src="<?php echo !empty($item['image_path']) ? $item['image_path'] : 'assets/images/default-food.jpg'; ?>" 
+                                                <img src="<?php 
+                                                    $image_path = !empty($item['image_path']) ? $item['image_path'] : 'assets/images/default-food.jpg';
+                                                    // Add leading slash if not present
+                                                    if (strpos($image_path, '/') !== 0) {
+                                                        $image_path = '/' . $image_path;
+                                                    }
+                                                    echo '/ERC-POS' . $image_path;
+                                                ?>" 
                                                      class="card-img-top menu-item-image" 
                                                      alt="<?php echo htmlspecialchars($item['name']); ?>"
-                                                     onerror="this.src='assets/images/default-food.jpg'">
+                                                     onerror="this.src='/ERC-POS/assets/images/default-food.jpg'">
                                                 <div class="card-body p-2">
                                                     <h6 class="card-title mb-1"><?php echo htmlspecialchars($item['name']); ?></h6>
                                                     <p class="card-text price mb-0">₱<?php echo number_format($item['price'], 2); ?></p>

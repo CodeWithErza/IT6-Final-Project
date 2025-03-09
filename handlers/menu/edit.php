@@ -12,6 +12,7 @@ try {
     $category_id = $_POST['category_id'] ?? '';
     $price = $_POST['price'] ?? '';
     $is_inventory_item = isset($_POST['is_inventory_item']) ? 1 : 0;
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
     $remove_image = isset($_POST['remove_image']) ? 1 : 0;
 
     // Validate required fields
@@ -107,10 +108,11 @@ try {
                 category_id = ?,
                 price = ?,
                 image_path = ?,
+                is_active = ?,
                 updated_by = ?
             WHERE id = ?
         ");
-        $stmt->execute([$name, $category_id, $price, $image_path, $_SESSION['user_id'], $id]);
+        $stmt->execute([$name, $category_id, $price, $image_path, $is_active, $_SESSION['user_id'], $id]);
 
         // Log the action
         log_audit(
@@ -122,13 +124,15 @@ try {
                 'name' => $menu_item['name'],
                 'category_id' => $menu_item['category_id'],
                 'price' => $menu_item['price'],
-                'image_path' => $menu_item['image_path']
+                'image_path' => $menu_item['image_path'],
+                'is_active' => $menu_item['is_active']
             ],
             [
                 'name' => $name,
                 'category_id' => $category_id,
                 'price' => $price,
-                'image_path' => $image_path
+                'image_path' => $image_path,
+                'is_active' => $is_active
             ]
         );
 

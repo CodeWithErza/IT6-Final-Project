@@ -17,7 +17,7 @@ $query = "
     FROM inventory_transactions it
     LEFT JOIN menu_items mi ON it.menu_item_id = mi.id
     LEFT JOIN users u ON it.created_by = u.id
-    WHERE it.transaction_type IN ('stock_in', 'initial')
+    WHERE it.transaction_type IN ('stock_in', 'adjustment')
     AND DATE(it.created_at) BETWEEN :start_date AND :end_date
 ";
 
@@ -47,7 +47,8 @@ foreach ($expenses as $expense) {
 ?>
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Expenses Report</h1>
+    <h1 class="mt-4">Inventory Expenses Report</h1>
+    <p class="text-muted">Track all expenses related to inventory purchases and stock management</p>
     
     <!-- Filters -->
     <div class="card mb-4 shadow-sm">
@@ -65,7 +66,7 @@ foreach ($expenses as $expense) {
                     <label class="form-label">Expense Type</label>
                     <select class="form-select" name="expense_type">
                         <option value="">All Types</option>
-                        <option value="initial" <?php echo $expense_type === 'initial' ? 'selected' : ''; ?>>Initial Stock</option>
+                        <option value="adjustment" <?php echo $expense_type === 'adjustment' ? 'selected' : ''; ?>>Stock Adjustment</option>
                         <option value="stock_in" <?php echo $expense_type === 'stock_in' ? 'selected' : ''; ?>>Stock In</option>
                     </select>
                 </div>
@@ -83,7 +84,7 @@ foreach ($expenses as $expense) {
             <div class="card bg-danger text-white mb-4 shadow-sm">
                 <div class="card-body">
                     <h4 class="mb-0">₱<?php echo number_format($total_expenses, 2); ?></h4>
-                    <div class="small">Total Expenses</div>
+                    <div class="small">Total Inventory Expenses</div>
                 </div>
             </div>
         </div>
@@ -91,7 +92,7 @@ foreach ($expenses as $expense) {
             <div class="card bg-warning text-white mb-4 shadow-sm">
                 <div class="card-body">
                     <h4 class="mb-0"><?php echo $total_items; ?></h4>
-                    <div class="small">Total Items</div>
+                    <div class="small">Total Items Purchased</div>
                 </div>
             </div>
         </div>
@@ -109,7 +110,7 @@ foreach ($expenses as $expense) {
     <div class="card mb-4 shadow-sm">
         <div class="card-header">
             <i class="bi bi-table me-1"></i>
-            Expenses Details
+            Inventory Expenses Details
         </div>
         <div class="card-body">
             <div class="table-responsive">
