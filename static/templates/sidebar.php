@@ -17,10 +17,10 @@ echo "<!-- Debug: current_dir = " . htmlspecialchars($current_dir) . " -->\n";
     <div class="position-sticky">
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link <?php echo $current_page === 'index' && $current_dir === 'htdocs' ? 'active' : ''; ?>" 
+                <a class="nav-link <?php echo ($current_page === 'index' && $current_dir === 'htdocs') || $current_dir === 'sales_order' ? 'active' : ''; ?>" 
                    href="/ERC-POS/index.php">
-                    <i class="fas fa-home me-2"></i>
-                    Home
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    Sales Order
                 </a>
             </li>
             <li class="nav-item">
@@ -45,84 +45,90 @@ echo "<!-- Debug: current_dir = " . htmlspecialchars($current_dir) . " -->\n";
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?php echo $current_dir === 'inventory' ? 'active' : ''; ?>" 
-                   href="#inventorySubmenu" 
+                <button class="nav-link w-100 text-start border-0 <?php echo $current_dir === 'inventory' ? 'active' : ''; ?>" 
+                   type="button"
                    data-bs-toggle="collapse" 
+                   data-bs-target="#inventorySubmenu"
                    aria-expanded="<?php echo $current_dir === 'inventory' ? 'true' : 'false'; ?>">
                     <i class="fas fa-boxes me-2"></i>
                     Inventory
                     <i class="fas fa-chevron-down float-end"></i>
-                </a>
-                <ul class="nav collapse <?php echo $current_dir === 'inventory' ? 'show' : ''; ?>" id="inventorySubmenu">
-                    <li class="nav-item">
-                        <a class="nav-link ms-3 <?php echo $current_page === 'index' && $current_dir === 'inventory' ? 'active' : ''; ?>" 
-                           href="/ERC-POS/views/inventory/index.php">
-                            <i class="fas fa-box me-2"></i>
-                            Stock Levels
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link ms-3 <?php echo $current_page === 'stock_in' ? 'active' : ''; ?>" 
-                           href="/ERC-POS/views/inventory/stock_in.php">
-                            <i class="fas fa-arrow-circle-down me-2"></i>
-                            Stock In
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link ms-3 <?php echo $current_page === 'stock_out' ? 'active' : ''; ?>" 
-                           href="/ERC-POS/views/inventory/stock_out.php">
-                            <i class="fas fa-arrow-circle-up me-2"></i>
-                            Stock Out
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link ms-3 <?php echo $current_page === 'stock_adjustment' ? 'active' : ''; ?>" 
-                           href="/ERC-POS/views/inventory/stock_adjustment.php">
-                            <i class="fas fa-balance-scale me-2"></i>
-                            Stock Adjustment
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link ms-3 <?php echo $current_page === 'history' ? 'active' : ''; ?>" 
-                           href="/ERC-POS/views/inventory/history.php">
-                            <i class="fas fa-history me-2"></i>
-                            All Transactions
-                        </a>
-                    </li>
-                </ul>
+                </button>
+                <div class="collapse <?php echo $current_dir === 'inventory' ? 'show' : ''; ?>" id="inventorySubmenu">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $current_page === 'index' && $current_dir === 'inventory' ? 'active' : ''; ?>" 
+                               href="/ERC-POS/views/inventory/index.php">
+                                <i class="fas fa-box me-2"></i>
+                                Stock Levels
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $current_page === 'stock_in' ? 'active' : ''; ?>" 
+                               href="/ERC-POS/views/inventory/stock_in.php">
+                                <i class="fas fa-arrow-circle-down me-2"></i>
+                                Stock In
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $current_page === 'stock_adjustment' ? 'active' : ''; ?>" 
+                               href="/ERC-POS/views/inventory/stock_adjustment.php">
+                                <i class="fas fa-balance-scale me-2"></i>
+                                Stock Adjustment
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $current_page === 'history' ? 'active' : ''; ?>" 
+                               href="/ERC-POS/views/inventory/history.php">
+                                <i class="fas fa-history me-2"></i>
+                                All Transactions
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?php echo $current_dir === 'reports' ? 'active' : ''; ?>" 
-                   href="#reportsSubmenu" 
+                <a class="nav-link <?php echo $current_dir === 'expenses' ? 'active' : ''; ?>" 
+                   href="/ERC-POS/views/expenses/index.php">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>
+                    Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link w-100 text-start border-0 <?php echo $current_dir === 'reports' ? 'active' : ''; ?>" 
+                   type="button"
                    data-bs-toggle="collapse" 
+                   data-bs-target="#reportsSubmenu"
                    aria-expanded="<?php echo $current_dir === 'reports' ? 'true' : 'false'; ?>">
                     <i class="fas fa-chart-bar me-2"></i>
                     Reports
                     <i class="fas fa-chevron-down float-end"></i>
-                </a>
-                <ul class="nav collapse <?php echo $current_dir === 'reports' ? 'show' : ''; ?>" id="reportsSubmenu">
-                    <li class="nav-item">
-                        <a class="nav-link ms-3 <?php echo $current_page === 'sales' ? 'active' : ''; ?>" 
-                           href="/ERC-POS/views/reports/sales.php">
-                            <i class="fas fa-chart-line me-2"></i>
-                            Sales Report
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link ms-3 <?php echo $current_page === 'expenses' ? 'active' : ''; ?>" 
-                           href="/ERC-POS/views/reports/expenses.php">
-                            <i class="fas fa-file-invoice-dollar me-2"></i>
-                            Expenses Report
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link ms-3 <?php echo $current_page === 'summary' ? 'active' : ''; ?>" 
-                           href="/ERC-POS/views/reports/summary.php">
-                            <i class="fas fa-chart-pie me-2"></i>
-                            Summary Report
-                        </a>
-                    </li>
-                </ul>
+                </button>
+                <div class="collapse <?php echo $current_dir === 'reports' ? 'show' : ''; ?>" id="reportsSubmenu">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $current_page === 'sales' ? 'active' : ''; ?>" 
+                               href="/ERC-POS/views/reports/sales.php">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Sales Report
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $current_page === 'expenses' ? 'active' : ''; ?>" 
+                               href="/ERC-POS/views/reports/expenses.php">
+                                <i class="fas fa-file-invoice-dollar me-2"></i>
+                                Expenses Report
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $current_page === 'summary' ? 'active' : ''; ?>" 
+                               href="/ERC-POS/views/reports/summary.php">
+                                <i class="fas fa-chart-pie me-2"></i>
+                                Summary Report
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
             <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
             <li class="nav-item">
@@ -189,6 +195,7 @@ echo "<!-- Debug: current_dir = " . htmlspecialchars($current_dir) . " -->\n";
     color: rgba(255, 255, 255, 0.85);
     padding: 0.7rem 1rem;
     transition: all 0.3s ease;
+    background: transparent;
 }
 
 .nav-link:hover {
@@ -203,14 +210,14 @@ echo "<!-- Debug: current_dir = " . htmlspecialchars($current_dir) . " -->\n";
     border-left: 3px solid #fff;
 }
 
-.nav .collapse {
+.collapse {
     background: rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     margin: 0 0.5rem;
 }
 
-.nav .collapse .nav-link {
-    padding-left: 2.5rem;
+.collapse .nav-link {
+    padding-left: 1rem;
 }
 
 /* Adjust main content margin */
@@ -227,18 +234,34 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Current Page:', '<?php echo $current_page; ?>');
     console.log('Current Directory:', '<?php echo $current_dir; ?>');
     
-    // Add click event listeners to all submenu toggles
+    // Make dropdown headers clickable
     document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function(element) {
         element.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Menu clicked:', this.getAttribute('href'));
-            const targetId = this.getAttribute('href').substring(1);
-            const targetElement = document.getElementById(targetId);
-            console.log('Target element:', targetElement);
-            if (targetElement) {
-                const bsCollapse = new bootstrap.Collapse(targetElement, {
-                    toggle: true
-                });
+            e.preventDefault(); // Always prevent default to handle navigation manually
+            
+            // If the link has a real URL (not #)
+            const href = this.getAttribute('href');
+            const targetId = this.getAttribute('data-bs-target');
+            const targetElement = document.querySelector(targetId);
+            
+            // Check if we're clicking on a dropdown that's already in the current directory
+            const isCurrentDir = this.classList.contains('active');
+            
+            if (isCurrentDir) {
+                // Toggle the dropdown
+                if (targetElement) {
+                    const bsCollapse = bootstrap.Collapse.getInstance(targetElement);
+                    if (bsCollapse) {
+                        bsCollapse.toggle();
+                    } else {
+                        new bootstrap.Collapse(targetElement, {
+                            toggle: true
+                        });
+                    }
+                }
+            } else if (href && href !== '#') {
+                // Navigate to the main page of that section
+                window.location.href = href;
             }
         });
     });

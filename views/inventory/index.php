@@ -262,11 +262,11 @@ function image_exists($path) {
         <a href="/ERC-POS/views/inventory/stock_in.php" style="background-color: #28a745;">
             <i class="fas fa-arrow-circle-down"></i> Stock In
         </a>
-        <a href="/ERC-POS/views/inventory/stock_out.php" style="background-color: #ffc107; color: black;">
-            <i class="fas fa-arrow-circle-up"></i> Stock Out
-        </a>
         <a href="/ERC-POS/views/inventory/stock_adjustment.php" style="background-color: #17a2b8;">
             <i class="fas fa-balance-scale"></i> Adjust Stock
+        </a>
+        <a href="/ERC-POS/views/expenses/index.php" style="background-color: #ffc107; color: black;">
+            <i class="fas fa-file-invoice-dollar"></i> Expenses
         </a>
         <a href="/ERC-POS/views/inventory/history.php" style="background-color: #6c757d;">
             <i class="fas fa-history"></i> All Transactions

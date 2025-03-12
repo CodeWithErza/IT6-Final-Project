@@ -13,6 +13,7 @@ $stmt = $conn->prepare("
     SELECT 
         id,
         username,
+        full_name,
         role,
         is_active,
         created_at,
@@ -64,6 +65,7 @@ $users = $stmt->fetchAll();
                     <thead>
                         <tr>
                             <th>Username</th>
+                            <th>Full Name</th>
                             <th>Role</th>
                             <th>Status</th>
                             <th>Created Date</th>
@@ -75,6 +77,7 @@ $users = $stmt->fetchAll();
                         <?php foreach ($users as $user): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($user['username']); ?></td>
+                                <td><?php echo htmlspecialchars($user['full_name']); ?></td>
                                 <td>
                                     <span class="badge <?php echo $user['role'] === 'admin' ? 'bg-danger' : 'bg-primary'; ?>">
                                         <?php echo ucfirst($user['role']); ?>
@@ -93,6 +96,7 @@ $users = $stmt->fetchAll();
                                     <button class="btn btn-sm btn-primary edit-user" 
                                             data-id="<?php echo $user['id']; ?>"
                                             data-username="<?php echo htmlspecialchars($user['username']); ?>"
+                                            data-full-name="<?php echo htmlspecialchars($user['full_name']); ?>"
                                             data-role="<?php echo $user['role']; ?>"
                                             data-status="<?php echo $user['is_active']; ?>"
                                             data-bs-toggle="modal" 
@@ -129,6 +133,10 @@ $users = $stmt->fetchAll();
                     <div class="mb-3">
                         <label class="form-label">Username</label>
                         <input type="text" class="form-control" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="full_name" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Password</label>
@@ -171,6 +179,10 @@ $users = $stmt->fetchAll();
                         <input type="text" class="form-control" name="username" id="edit_username" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="full_name" id="edit_full_name" required>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">New Password (leave blank to keep current)</label>
                         <input type="password" class="form-control" name="password">
                     </div>
@@ -202,45 +214,71 @@ $users = $stmt->fetchAll();
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete user "<span id="delete-user-name"></span>"?</p>
+                <p class="text-danger mb-0">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="#" id="confirm-delete" class="btn btn-danger">Delete User</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+$(document).ready(function() {
     // Initialize DataTable
-    $('#usersTable').DataTable({
+    const table = $('#usersTable').DataTable({
         order: [[3, 'desc']],
-        pageLength: 10
+        pageLength: 10,
+        responsive: true
     });
 
     // Edit User
-    document.querySelectorAll('.edit-user').forEach(button => {
-        button.addEventListener('click', function() {
-            const id = this.dataset.id;
-            const username = this.dataset.username;
-            const role = this.dataset.role;
-            const status = this.dataset.status;
+    $(document).on('click', '.edit-user', function() {
+        const id = $(this).data('id');
+        const username = $(this).data('username');
+        const fullName = $(this).data('fullName');
+        const role = $(this).data('role');
+        const status = $(this).data('status');
 
-            document.getElementById('edit_user_id').value = id;
-            document.getElementById('edit_username').value = username;
-            document.getElementById('edit_role').value = role;
-            document.getElementById('edit_status').value = status;
-        });
+        $('#edit_user_id').val(id);
+        $('#edit_username').val(username);
+        $('#edit_full_name').val(fullName);
+        $('#edit_role').val(role);
+        $('#edit_status').val(status);
     });
 
     // Delete User
-    document.querySelectorAll('.delete-user').forEach(button => {
-        button.addEventListener('click', function() {
-            const id = this.dataset.id;
-            const username = this.dataset.username;
-
-            if (confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
-                window.location.href = `/ERC-POS/handlers/users/delete.php?id=${id}`;
-            }
-        });
+    $(document).on('click', '.delete-user', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const username = $(this).data('username');
+        
+        // Set the username in the modal
+        $('#delete-user-name').text(username);
+        
+        // Update the confirm delete button's href
+        $('#confirm-delete').attr('href', `/ERC-POS/handlers/users/delete.php?id=${id}`);
+        
+        // Show the modal
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+        deleteModal.show();
     });
 
-    // Password Validation
-    document.querySelector('#addUserModal form').addEventListener('submit', function(e) {
-        const password = this.querySelector('input[name="password"]').value;
-        const confirm = this.querySelector('input[name="confirm_password"]').value;
+    // Password Validation for Add User
+    $('#addUserModal form').on('submit', function(e) {
+        const password = $(this).find('input[name="password"]').val();
+        const confirm = $(this).find('input[name="confirm_password"]').val();
 
         if (password !== confirm) {
             e.preventDefault();
@@ -248,9 +286,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.querySelector('#editUserModal form').addEventListener('submit', function(e) {
-        const password = this.querySelector('input[name="password"]').value;
-        const confirm = this.querySelector('input[name="confirm_password"]').value;
+    // Password Validation for Edit User
+    $('#editUserModal form').on('submit', function(e) {
+        const password = $(this).find('input[name="password"]').val();
+        const confirm = $(this).find('input[name="confirm_password"]').val();
 
         if (password && password !== confirm) {
             e.preventDefault();

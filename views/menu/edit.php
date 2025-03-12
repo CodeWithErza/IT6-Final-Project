@@ -125,24 +125,6 @@ unset($_SESSION['error'], $_SESSION['success']);
                                 </small>
                             </div>
                         </div>
-
-                        <?php if ($menu_item['is_inventory_item']): ?>
-                        <div class="mb-3" id="stock_adjustment_div">
-                            <label for="stock_adjustment" class="form-label">Stock Adjustment</label>
-                            <div class="input-group">
-                                <select class="form-select" id="adjustment_type" name="adjustment_type" style="max-width: 150px;">
-                                    <option value="add">Add Stock</option>
-                                    <option value="subtract">Subtract Stock</option>
-                                </select>
-                                <input type="number" class="form-control" id="stock_adjustment" 
-                                       name="stock_adjustment" min="0" placeholder="Enter quantity">
-                                <button type="button" class="btn btn-secondary" onclick="adjustStock()">
-                                    Apply Adjustment
-                                </button>
-                            </div>
-                            <small class="text-muted">Current Stock: <?php echo $menu_item['current_stock']; ?></small>
-                        </div>
-                        <?php endif; ?>
                     </div>
 
                     <div class="col-md-4">
@@ -215,41 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-function adjustStock() {
-    const type = document.getElementById('adjustment_type').value;
-    const quantity = parseInt(document.getElementById('stock_adjustment').value);
-    
-    if (!quantity || quantity < 0) {
-        alert('Please enter a valid quantity');
-        return;
-    }
-
-    // Create form data
-    const formData = new FormData();
-    formData.append('menu_item_id', <?php echo $menu_item['id']; ?>);
-    formData.append('type', type);
-    formData.append('quantity', quantity);
-
-    // Send request
-    fetch('/ERC-POS/handlers/menu/adjust_stock.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            location.reload();
-        } else {
-            alert(data.error || 'Failed to adjust stock');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to adjust stock');
-    });
-}
 </script>
 
 <?php include __DIR__ . '/../../static/templates/footer.php'; ?> 

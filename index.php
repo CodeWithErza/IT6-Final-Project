@@ -5,8 +5,7 @@ include 'static/templates/header.php';
 // Get all categories
 $stmt = $conn->prepare("
     SELECT * FROM categories 
-    WHERE is_active = 1 
-    ORDER BY sort_order ASC, name ASC
+    ORDER BY name ASC
 ");
 $stmt->execute();
 $categories = $stmt->fetchAll();
@@ -428,8 +427,14 @@ unset($_SESSION['success'], $_SESSION['error']);
         document.querySelector('.subtotal').textContent = `₱${subtotal.toFixed(2)}`;
         calculateTotals();
         
-        // Enable/disable complete order button
-        document.querySelector('.complete-order-btn').disabled = orderItems.size === 0;
+        // If no items, clear amount received and reset change
+        if (orderItems.size === 0) {
+            document.querySelector('.amount-received').value = '';
+            document.querySelector('.change').textContent = '₱0.00';
+            document.querySelector('.change').classList.remove('text-danger');
+            document.querySelector('.amount-received').classList.remove('border-danger');
+            document.querySelector('.complete-order-btn').disabled = true;
+        }
     }
 
     // Function to add item to order
@@ -480,13 +485,28 @@ unset($_SESSION['success'], $_SESSION['error']);
         // Calculate change if amount received is entered
         const amountReceived = parseFloat(document.querySelector('.amount-received').value) || 0;
         const change = amountReceived - total;
-        document.querySelector('.change').textContent = `₱${Math.max(0, change).toFixed(2)}`;
+        
+        // Show negative change if amount received is less than total
+        document.querySelector('.change').textContent = `₱${change.toFixed(2)}`;
+        
+        // Update complete order button state
+        const completeOrderBtn = document.querySelector('.complete-order-btn');
+        completeOrderBtn.disabled = orderItems.size === 0 || amountReceived < total;
+        
+        // Add visual feedback for insufficient amount
+        if (amountReceived > 0 && amountReceived < total) {
+            document.querySelector('.change').classList.add('text-danger');
+            document.querySelector('.amount-received').classList.add('border-danger');
+        } else {
+            document.querySelector('.change').classList.remove('text-danger');
+            document.querySelector('.amount-received').classList.remove('border-danger');
+        }
         
         return {
             subtotal: subtotal,
             discount: discount,
             total: total,
-            change: Math.max(0, change)
+            change: change
         };
     }
 
@@ -507,6 +527,11 @@ unset($_SESSION['success'], $_SESSION['error']);
 
     // Event listener for complete order button
     document.querySelector('.complete-order-btn').addEventListener('click', async function() {
+        // If button is disabled, don't proceed
+        if (this.disabled) {
+            return;
+        }
+        
         const totals = calculateTotals();
         const amountReceived = parseFloat(document.querySelector('.amount-received').value) || 0;
 

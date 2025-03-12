@@ -19,6 +19,7 @@ $user_id = $_POST['user_id'];
 $username = trim($_POST['username']);
 $password = $_POST['password'];
 $confirm_password = $_POST['confirm_password'];
+$full_name = trim($_POST['full_name']);
 $role = $_POST['role'];
 $is_active = $_POST['is_active'];
 
@@ -57,6 +58,19 @@ $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? AND id != ?");
 $stmt->execute([$username, $user_id]);
 if ($stmt->fetch()) {
     $_SESSION['error'] = 'Username already exists.';
+    header('Location: /ERC-POS/views/users/index.php');
+    exit;
+}
+
+// Validate full name
+if (empty($full_name)) {
+    $_SESSION['error'] = 'Full name is required.';
+    header('Location: /ERC-POS/views/users/index.php');
+    exit;
+}
+
+if (strlen($full_name) > 100) {
+    $_SESSION['error'] = 'Full name must not exceed 100 characters.';
     header('Location: /ERC-POS/views/users/index.php');
     exit;
 }
@@ -103,23 +117,25 @@ try {
             UPDATE users 
             SET username = ?, 
                 password = ?,
+                full_name = ?,
                 role = ?,
                 is_active = ?,
                 updated_at = NOW()
             WHERE id = ?
         ");
-        $stmt->execute([$username, $hashed_password, $role, $is_active, $user_id]);
+        $stmt->execute([$username, $hashed_password, $full_name, $role, $is_active, $user_id]);
     } else {
         // Update without changing password
         $stmt = $conn->prepare("
             UPDATE users 
             SET username = ?, 
+                full_name = ?,
                 role = ?,
                 is_active = ?,
                 updated_at = NOW()
             WHERE id = ?
         ");
-        $stmt->execute([$username, $role, $is_active, $user_id]);
+        $stmt->execute([$username, $full_name, $role, $is_active, $user_id]);
     }
 
     // If user is deactivated, log them out

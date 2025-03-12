@@ -1,16 +1,15 @@
 # Inventory Management Views
 
-This document explains the separation of inventory management into distinct views for better organization and usability.
+This document explains the organization of inventory management in the ERC-POS system.
 
 ## Overview
 
-The inventory management system has been reorganized into separate views for each type of transaction:
+The inventory management system includes the following components:
 
 1. **Stock Levels** - Overview of current inventory levels
 2. **Stock In** - Managing incoming inventory (purchases)
-3. **Stock Out** - Tracking outgoing inventory (sales, usage)
-4. **Stock Adjustment** - Making corrections to inventory counts
-5. **All Transactions** - Complete history of all inventory transactions
+3. **Stock Adjustment** - Making corrections to inventory counts
+4. **All Transactions** - Complete history of all inventory transactions
 
 ## Features by View
 
@@ -18,18 +17,13 @@ The inventory management system has been reorganized into separate views for eac
 - Shows current stock levels for all inventory items
 - Provides quick overview of inventory status
 - Highlights low stock items
+- Links to other inventory management functions
 
 ### Stock In (stock_in.php)
 - Focused on adding new inventory
 - Records purchases with supplier information
 - Tracks costs for expense reporting
 - Shows summary of items added and total costs
-
-### Stock Out (stock_out.php)
-- Shows inventory removed from stock
-- Categorizes by reason (sales, waste, etc.)
-- Links to related orders when applicable
-- Provides quantity summaries
 
 ### Stock Adjustment (stock_adjustment.php)
 - Dedicated interface for inventory corrections
@@ -41,14 +35,22 @@ The inventory management system has been reorganized into separate views for eac
 - Comprehensive view of all inventory movements
 - Includes all transaction types in one view
 - Provides advanced filtering options
+- Tracks inventory history for auditing purposes
 
-## Benefits of Separation
+## Integration with Expenses System
 
-1. **Focused Interfaces** - Each view is optimized for its specific purpose
-2. **Improved Organization** - Easier to find specific transaction types
-3. **Better Data Entry** - Forms tailored to each transaction type
-4. **Clearer Reporting** - Separate views make it easier to analyze different aspects of inventory
-5. **Reduced Complexity** - Users only see what's relevant to their current task
+While inventory management has its own dedicated screens, it also integrates with the Expenses system:
+
+1. **Expenses Management** - Record all expenses including inventory-related costs
+2. **Expense Types** - Categorize expenses (ingredients, utilities, etc.)
+3. **Expense Reporting** - Comprehensive reporting of all business expenses
+
+## Benefits of This Approach
+
+1. **Specialized Inventory Management** - Dedicated tools for inventory-specific operations
+2. **Unified Financial Tracking** - All expenses in one place for financial reporting
+3. **Clear Separation of Concerns** - Inventory management vs. financial tracking
+4. **Comprehensive Reporting** - Integrated reports that show both inventory and expense data
 
 ## Implementation Notes
 

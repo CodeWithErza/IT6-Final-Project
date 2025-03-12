@@ -47,7 +47,7 @@ try {
     $_SESSION['username'] = $user['username'];
     $_SESSION['role'] = $user['role'];
 
-    // Redirect to home page
+    // Redirect to sales order page
     header('Location: /ERC-POS/index.php');
 } catch (PDOException $e) {
     $_SESSION['error'] = 'Error during login: ' . $e->getMessage();

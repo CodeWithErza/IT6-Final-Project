@@ -1,31 +1,80 @@
             </main>
         </div>
     </div>
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Footer Credits -->
+    <footer class="footer mt-auto py-3">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 text-muted">
+                        <small>&copy; <?php echo date('Y'); ?> ERC-POS System. All rights reserved.</small>
+                    </p>
+                    <p class="mb-0 text-muted">
+                        <small>Developed by: Dumangcas, Era G. | Diog, Casandra Ella V. | Dolino, Ryle Joshua E.</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
     <!-- Custom JavaScript -->
     <script src="/ERC-POS/assets/js/main.js"></script>
     <script>
-    // Debug: Check if Bootstrap is loaded
-    console.log('Bootstrap loaded:', typeof bootstrap !== 'undefined');
-    console.log('jQuery loaded:', typeof jQuery !== 'undefined');
-    
-    // Initialize all Bootstrap components
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize all dropdowns
-        var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
-        var dropdownList = dropdownElementList.map(function(element) {
-            return new bootstrap.Dropdown(element);
+        // Initialize Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
         
-        // Initialize all collapses
-        var collapseElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="collapse"]'));
-        var collapseList = collapseElementList.map(function(element) {
-            return new bootstrap.Collapse(element, {toggle: false});
+        // Fix dropdown behavior in sidebar
+        document.querySelectorAll('.sidebar button[data-bs-toggle="collapse"]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const target = document.querySelector(this.getAttribute('data-bs-target'));
+                if (target) {
+                    // Use Bootstrap's API to toggle the collapse
+                    const bsCollapse = new bootstrap.Collapse(target, {
+                        toggle: true
+                    });
+                }
+            });
         });
+        
+        // Fix user dropdown in header
+        const userDropdown = document.getElementById('userDropdown');
+        if (userDropdown) {
+            // Initialize dropdown
+            new bootstrap.Dropdown(userDropdown);
+        }
     });
     </script>
+
+    <style>
+    .footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        padding: 10px 0;
+        font-size: 0.85rem;
+        z-index: 1000;
+        margin-left: 220px;
+        width: calc(100% - 220px);
+    }
+    
+    @media (max-width: 768px) {
+        .footer {
+            margin-left: 0;
+            width: 100%;
+        }
+    }
+    
+    /* Add some bottom padding to main content to prevent overlap with footer */
+    main {
+        padding-bottom: 80px;
+    }
+    </style>
 </body>
 </html> 

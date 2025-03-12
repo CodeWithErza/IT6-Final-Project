@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $username = trim($_POST['username']);
 $password = $_POST['password'];
 $confirm_password = $_POST['confirm_password'];
+$full_name = trim($_POST['full_name']);
 $role = $_POST['role'];
 
 // Validate username
@@ -64,6 +65,19 @@ if ($password !== $confirm_password) {
     exit;
 }
 
+// Validate full name
+if (empty($full_name)) {
+    $_SESSION['error'] = 'Full name is required.';
+    header('Location: /ERC-POS/views/users/index.php');
+    exit;
+}
+
+if (strlen($full_name) > 100) {
+    $_SESSION['error'] = 'Full name must not exceed 100 characters.';
+    header('Location: /ERC-POS/views/users/index.php');
+    exit;
+}
+
 // Validate role
 if (!in_array($role, ['admin', 'staff'])) {
     $_SESSION['error'] = 'Invalid role selected.';
@@ -77,10 +91,10 @@ try {
 
     // Insert new user
     $stmt = $conn->prepare("
-        INSERT INTO users (username, password, role, is_active, created_at)
-        VALUES (?, ?, ?, 1, NOW())
+        INSERT INTO users (username, password, full_name, role, is_active, created_at)
+        VALUES (?, ?, ?, ?, 1, NOW())
     ");
-    $stmt->execute([$username, $hashed_password, $role]);
+    $stmt->execute([$username, $hashed_password, $full_name, $role]);
 
     $_SESSION['success'] = 'User created successfully.';
 } catch (PDOException $e) {

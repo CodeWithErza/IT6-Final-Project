@@ -41,7 +41,7 @@ try {
         'delete',
         'categories',
         $id,
-        ['name' => $category['name'], 'description' => $category['description']],
+        ['name' => $category['name']],
         null
     );
 

@@ -8,7 +8,7 @@ CREATE TABLE users (
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
-    role ENUM('admin', 'employee') NOT NULL,
+    role ENUM('admin', 'staff') NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -33,8 +33,6 @@ CREATE TABLE settings (
 CREATE TABLE categories (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    display_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INT,
     FOREIGN KEY (created_by) REFERENCES users(id)
@@ -50,7 +48,6 @@ CREATE TABLE menu_items (
     current_stock INT DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
     image_url VARCHAR(255),
-    sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by INT,
@@ -64,6 +61,9 @@ CREATE TABLE orders (
     order_number VARCHAR(50) UNIQUE NOT NULL,
     user_id INT,
     total_amount DECIMAL(10,2) NOT NULL,
+    subtotal_amount DECIMAL(10,2) NOT NULL,
+    discount_type VARCHAR(20) DEFAULT NULL,
+    discount_amount DECIMAL(10,2) DEFAULT 0.00,
     cash_received DECIMAL(10,2) NOT NULL,
     cash_change DECIMAL(10,2) NOT NULL,
     payment_method ENUM('cash', 'card', 'other') DEFAULT 'cash',
@@ -158,11 +158,11 @@ INSERT INTO settings (setting_name, setting_value, setting_type, setting_group, 
 ('default_stock_adjustment_notes', 'Regular stock count adjustment', 'text', 'inventory', 'Default Stock Adjustment Notes', 'Default notes for stock adjustments', 'Can be changed during actual stock adjustment');
 
 -- Insert test categories
-INSERT INTO categories (name, is_active, display_order) VALUES
-('Rice Meals', 1, 1),
-('Beverages', 1, 2),
-('Snacks', 1, 3),
-('Desserts', 1, 4);
+INSERT INTO categories (name) VALUES
+('Rice Meals'),
+('Beverages'),
+('Snacks'),
+('Desserts');
 
 -- Insert default admin user (password: admin123)
 INSERT INTO users (username, password, full_name, role) 

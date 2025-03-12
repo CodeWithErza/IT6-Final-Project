@@ -28,6 +28,10 @@ try {
         $_SESSION['role'] = $user['role'];
         $_SESSION['access_token'] = $token;
 
+        // Update last login timestamp
+        $stmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+        $stmt->execute([$user['id']]);
+
         // Log the successful login
         log_audit($user['id'], 'login', 'users', $user['id']);
 

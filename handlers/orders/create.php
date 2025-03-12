@@ -20,48 +20,81 @@ try {
     // Start transaction
     $conn->beginTransaction();
 
-    // Generate order number (YYYYMMDD-XXXX format)
-    $date = date('Ymd');
-    $stmt = $conn->prepare("
-        SELECT COUNT(*) + 1 as next_number 
-        FROM orders 
-        WHERE DATE(created_at) = CURDATE()
-    ");
-    $stmt->execute();
-    $result = $stmt->fetch();
-    $orderNumber = $date . '-' . str_pad($result['next_number'], 4, '0', STR_PAD_LEFT);
-
-    // Insert order
-    $stmt = $conn->prepare("
-        INSERT INTO orders (
-            order_number,
-            subtotal_amount,
-            discount_type,
-            discount_amount,
-            total_amount,
-            cash_received,
-            cash_change,
-            payment_method,
-            notes,
-            status,
-            created_by,
-            created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?, NOW())
-    ");
-    $stmt->execute([
-        $orderNumber,
-        $data['subtotal'],
-        $data['discount_type'],
-        $data['discount_amount'],
-        $data['total'],
-        $data['amount_received'],
-        $data['change'],
-        $data['payment_method'],
-        $data['notes'],
-        $_SESSION['user_id']
-    ]);
+    // Generate order number (YYYYMMDD-XXXX format) with retry mechanism
+    $maxRetries = 5;
+    $retryCount = 0;
+    $orderNumber = null;
+    $orderCreated = false;
     
-    $orderId = $conn->lastInsertId();
+    while (!$orderCreated && $retryCount < $maxRetries) {
+        try {
+            $date = date('Ymd');
+            
+            // Get the latest order number for today
+            $stmt = $conn->prepare("
+                SELECT MAX(SUBSTRING_INDEX(order_number, '-', -1)) as last_number 
+                FROM orders 
+                WHERE order_number LIKE ?
+            ");
+            $stmt->execute([$date . '-%']);
+            $result = $stmt->fetch();
+            
+            $nextNumber = 1;
+            if ($result && $result['last_number']) {
+                $nextNumber = intval($result['last_number']) + 1;
+            }
+            
+            $orderNumber = $date . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            
+            // Insert order with the generated order number
+            $stmt = $conn->prepare("
+                INSERT INTO orders (
+                    order_number,
+                    subtotal_amount,
+                    discount_type,
+                    discount_amount,
+                    total_amount,
+                    cash_received,
+                    cash_change,
+                    payment_method,
+                    notes,
+                    status,
+                    created_by,
+                    created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?, NOW())
+            ");
+            $stmt->execute([
+                $orderNumber,
+                $data['subtotal'],
+                $data['discount_type'],
+                $data['discount_amount'],
+                $data['total'],
+                $data['amount_received'],
+                $data['change'],
+                $data['payment_method'],
+                $data['notes'],
+                $_SESSION['user_id']
+            ]);
+            
+            $orderId = $conn->lastInsertId();
+            $orderCreated = true;
+        } catch (PDOException $e) {
+            // If duplicate entry error, retry with a new order number
+            if ($e->getCode() == 23000 && strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                $retryCount++;
+                // Small delay to reduce chance of collision
+                usleep(100000); // 100ms delay
+            } else {
+                // For other errors, rethrow
+                throw $e;
+            }
+        }
+    }
+    
+    // If we couldn't create an order after max retries, throw an exception
+    if (!$orderCreated) {
+        throw new Exception("Failed to generate a unique order number after $maxRetries attempts");
+    }
 
     // Insert order items
     $stmt = $conn->prepare("
@@ -85,33 +118,7 @@ try {
             $subtotal
         ]);
 
-        // Update inventory if menu item is tracked
-        $inventoryStmt = $conn->prepare("
-            INSERT INTO inventory_transactions (
-                menu_item_id,
-                transaction_type,
-                quantity,
-                notes,
-                created_by,
-                created_at
-            ) 
-            SELECT 
-                ?,
-                'stock_out',
-                ?,
-                CONCAT('Order: ', ?),
-                ?,
-                NOW()
-            FROM menu_items 
-            WHERE id = ? AND is_inventory_item = 1
-        ");
-        $inventoryStmt->execute([
-            $item['menu_item_id'],
-            $item['quantity'],
-            $orderNumber,
-            $_SESSION['user_id'],
-            $item['menu_item_id']
-        ]);
+        // Note: Stock out functionality has been removed and replaced with a more flexible expenses system
     }
 
     // Commit transaction

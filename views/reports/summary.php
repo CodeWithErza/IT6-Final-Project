@@ -27,12 +27,13 @@ $stmt->bindParam(':end_date', $end_date);
 $stmt->execute();
 $sales_data = $stmt->fetchAll();
 
-// Get expenses data
-$expenses_query = "
+// Get inventory expenses data
+$inventory_expenses_query = "
     SELECT 
         DATE(it.created_at) as date,
-        SUM(it.quantity * mi.price) as total_expenses,
-        COUNT(*) as transaction_count
+        SUM(it.quantity * COALESCE(it.unit_price, mi.price)) as total_expenses,
+        COUNT(*) as transaction_count,
+        'inventory' as expense_source
     FROM inventory_transactions it
     LEFT JOIN menu_items mi ON it.menu_item_id = mi.id
     WHERE it.transaction_type IN ('stock_in', 'adjustment')
@@ -41,17 +42,40 @@ $expenses_query = "
     ORDER BY date DESC
 ";
 
-$stmt = $conn->prepare($expenses_query);
+$stmt = $conn->prepare($inventory_expenses_query);
 $stmt->bindParam(':start_date', $start_date);
 $stmt->bindParam(':end_date', $end_date);
 $stmt->execute();
-$expenses_data = $stmt->fetchAll();
+$inventory_expenses_data = $stmt->fetchAll();
+
+// Get general expenses data
+$general_expenses_query = "
+    SELECT 
+        expense_date as date,
+        SUM(amount) as total_expenses,
+        COUNT(*) as transaction_count,
+        'general' as expense_source,
+        expense_type
+    FROM expenses
+    WHERE expense_date BETWEEN :start_date AND :end_date
+    GROUP BY expense_date, expense_type
+    ORDER BY date DESC
+";
+
+$stmt = $conn->prepare($general_expenses_query);
+$stmt->bindParam(':start_date', $start_date);
+$stmt->bindParam(':end_date', $end_date);
+$stmt->execute();
+$general_expenses_data = $stmt->fetchAll();
 
 // Calculate totals
 $total_sales = 0;
 $total_orders = 0;
+$total_inventory_expenses = 0;
+$total_general_expenses = 0;
 $total_expenses = 0;
 $sales_by_payment = [];
+$expenses_by_type = [];
 $daily_data = [];
 
 foreach ($sales_data as $sale) {
@@ -68,27 +92,61 @@ foreach ($sales_data as $sale) {
         $daily_data[$date] = [
             'sales' => 0,
             'orders' => 0,
-            'expenses' => 0
+            'inventory_expenses' => 0,
+            'general_expenses' => 0,
+            'total_expenses' => 0
         ];
     }
     $daily_data[$date]['sales'] += $sale['total_sales'];
     $daily_data[$date]['orders'] += $sale['order_count'];
 }
 
-foreach ($expenses_data as $expense) {
+foreach ($inventory_expenses_data as $expense) {
     $date = $expense['date'];
-    $total_expenses += $expense['total_expenses'];
+    $total_inventory_expenses += $expense['total_expenses'];
+    
+    if (!isset($expenses_by_type['inventory'])) {
+        $expenses_by_type['inventory'] = 0;
+    }
+    $expenses_by_type['inventory'] += $expense['total_expenses'];
     
     if (!isset($daily_data[$date])) {
         $daily_data[$date] = [
             'sales' => 0,
             'orders' => 0,
-            'expenses' => 0
+            'inventory_expenses' => 0,
+            'general_expenses' => 0,
+            'total_expenses' => 0
         ];
     }
-    $daily_data[$date]['expenses'] += $expense['total_expenses'];
+    $daily_data[$date]['inventory_expenses'] += $expense['total_expenses'];
+    $daily_data[$date]['total_expenses'] += $expense['total_expenses'];
 }
 
+foreach ($general_expenses_data as $expense) {
+    $date = $expense['date'];
+    $expense_type = $expense['expense_type'];
+    $total_general_expenses += $expense['total_expenses'];
+    
+    if (!isset($expenses_by_type[$expense_type])) {
+        $expenses_by_type[$expense_type] = 0;
+    }
+    $expenses_by_type[$expense_type] += $expense['total_expenses'];
+    
+    if (!isset($daily_data[$date])) {
+        $daily_data[$date] = [
+            'sales' => 0,
+            'orders' => 0,
+            'inventory_expenses' => 0,
+            'general_expenses' => 0,
+            'total_expenses' => 0
+        ];
+    }
+    $daily_data[$date]['general_expenses'] += $expense['total_expenses'];
+    $daily_data[$date]['total_expenses'] += $expense['total_expenses'];
+}
+
+$total_expenses = $total_inventory_expenses + $total_general_expenses;
 $net_profit = $total_sales - $total_expenses;
 ?>
 
@@ -129,7 +187,7 @@ $net_profit = $total_sales - $total_expenses;
             <div class="card bg-danger text-white mb-4 shadow-sm">
                 <div class="card-body">
                     <h4 class="mb-0">₱<?php echo number_format($total_expenses, 2); ?></h4>
-                    <div class="small">Total Inventory Expenses</div>
+                    <div class="small">Total Expenses</div>
                 </div>
             </div>
         </div>
@@ -151,12 +209,13 @@ $net_profit = $total_sales - $total_expenses;
         </div>
     </div>
 
-    <!-- Payment Method Breakdown -->
+    <!-- Breakdown Cards -->
     <div class="row mb-4">
+        <!-- Payment Method Breakdown -->
         <div class="col-md-6">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm h-100">
                 <div class="card-header">
-                    <i class="bi bi-cash me-1"></i>
+                    <i class="fas fa-cash-register me-1"></i>
                     Sales by Payment Method
                 </div>
                 <div class="card-body">
@@ -173,7 +232,7 @@ $net_profit = $total_sales - $total_expenses;
                                 <?php foreach ($sales_by_payment as $method => $amount): ?>
                                     <tr>
                                         <td>
-                                            <span class="badge bg-primary">
+                                            <span class="badge bg-<?php echo $method === 'cash' ? 'success' : ($method === 'card' ? 'info' : 'secondary'); ?>">
                                                 <?php echo ucfirst($method); ?>
                                             </span>
                                         </td>
@@ -187,12 +246,66 @@ $net_profit = $total_sales - $total_expenses;
                 </div>
             </div>
         </div>
+        
+        <!-- Expenses Breakdown -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <i class="fas fa-file-invoice-dollar me-1"></i>
+                    Expenses by Type
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Expense Type</th>
+                                    <th>Amount</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($expenses_by_type as $type => $amount): ?>
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-<?php 
+                                                echo match($type) {
+                                                    'inventory' => 'secondary',
+                                                    'ingredient' => 'primary',
+                                                    'utility' => 'info',
+                                                    'salary' => 'success',
+                                                    'rent' => 'warning',
+                                                    'equipment' => 'dark',
+                                                    'maintenance' => 'danger',
+                                                    default => 'light text-dark'
+                                                };
+                                            ?>">
+                                                <?php echo ucfirst($type); ?>
+                                            </span>
+                                        </td>
+                                        <td>₱<?php echo number_format($amount, 2); ?></td>
+                                        <td><?php echo number_format(($amount / $total_expenses) * 100, 1); ?>%</td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-secondary">
+                                    <th>Total</th>
+                                    <th>₱<?php echo number_format($total_expenses, 2); ?></th>
+                                    <th>100%</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Daily Breakdown -->
     <div class="card mb-4 shadow-sm">
         <div class="card-header">
-            <i class="bi bi-calendar3 me-1"></i>
+            <i class="fas fa-calendar-alt me-1"></i>
             Daily Breakdown
         </div>
         <div class="card-body">
@@ -203,6 +316,8 @@ $net_profit = $total_sales - $total_expenses;
                             <th>Date</th>
                             <th>Sales</th>
                             <th>Inventory Expenses</th>
+                            <th>General Expenses</th>
+                            <th>Total Expenses</th>
                             <th>Profit</th>
                             <th>Orders</th>
                             <th>Profit Margin</th>
@@ -211,13 +326,15 @@ $net_profit = $total_sales - $total_expenses;
                     <tbody>
                         <?php foreach ($daily_data as $date => $data): ?>
                             <?php 
-                            $daily_profit = $data['sales'] - $data['expenses'];
+                            $daily_profit = $data['sales'] - $data['total_expenses'];
                             $profit_margin = $data['sales'] > 0 ? ($daily_profit / $data['sales']) * 100 : 0;
                             ?>
                             <tr>
                                 <td><?php echo date('M d, Y', strtotime($date)); ?></td>
                                 <td>₱<?php echo number_format($data['sales'], 2); ?></td>
-                                <td>₱<?php echo number_format($data['expenses'], 2); ?></td>
+                                <td>₱<?php echo number_format($data['inventory_expenses'], 2); ?></td>
+                                <td>₱<?php echo number_format($data['general_expenses'], 2); ?></td>
+                                <td>₱<?php echo number_format($data['total_expenses'], 2); ?></td>
                                 <td>
                                     <span class="<?php echo $daily_profit >= 0 ? 'text-success' : 'text-danger'; ?>">
                                         ₱<?php echo number_format($daily_profit, 2); ?>

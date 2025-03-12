@@ -6,7 +6,7 @@ include __DIR__ . '/../../static/templates/header.php';
 $stmt = $conn->prepare("
     SELECT * FROM categories 
     WHERE is_active = 1 
-    ORDER BY display_order ASC
+    ORDER BY name ASC
 ");
 $stmt->execute();
 $categories = $stmt->fetchAll();
@@ -27,7 +27,7 @@ $stmt = $conn->prepare("
     LEFT JOIN inventory_transactions it ON m.id = it.menu_item_id
     WHERE m.is_active = 1
     GROUP BY m.id, m.name, m.price, m.image_path, m.is_active, m.category_id, m.created_at, m.updated_at, m.is_inventory_item, c.name
-    ORDER BY m.display_order ASC
+    ORDER BY m.name ASC
 ");
 $stmt->execute();
 $menu_items = $stmt->fetchAll();

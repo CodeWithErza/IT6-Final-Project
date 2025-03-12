@@ -14,7 +14,6 @@ try {
 
     // Validate and sanitize input
     $name = trim($_POST['name'] ?? '');
-    $description = trim($_POST['description'] ?? '');
 
     if (empty($name)) {
         throw new Exception('Category name is required');
@@ -28,8 +27,8 @@ try {
     }
 
     // Create category
-    $stmt = $conn->prepare("INSERT INTO categories (name, description) VALUES (?, ?)");
-    $stmt->execute([$name, $description]);
+    $stmt = $conn->prepare("INSERT INTO categories (name, created_by) VALUES (?, ?)");
+    $stmt->execute([$name, $_SESSION['user_id']]);
 
     // Log the action
     log_audit(
@@ -38,7 +37,10 @@ try {
         'categories',
         $conn->lastInsertId(),
         null,
-        ['name' => $name, 'description' => $description]
+        [
+            'name' => $name,
+            'created_by' => $_SESSION['user_id']
+        ]
     );
 
     $_SESSION['success'] = "Category created successfully!";

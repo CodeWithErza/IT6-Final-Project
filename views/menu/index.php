@@ -253,13 +253,6 @@ unset($_SESSION['success'], $_SESSION['error']);
                                                        onclick="openEditModal(this)">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
-                                                <?php if ($item['is_inventory_item']): ?>
-                                                    <a href="/ERC-POS/views/inventory/adjust.php?id=<?php echo $item['id']; ?>" 
-                                                       class="btn btn-sm btn-info" 
-                                                       title="Adjust Stock">
-                                                        <i class="fas fa-boxes"></i>
-                                                    </a>
-                                                <?php endif; ?>
                                                 <form action="/ERC-POS/handlers/menu/delete.php" method="POST" class="d-inline" 
                                                       onsubmit="return confirm('Are you sure you want to delete this menu item? This action cannot be undone.');">
                                                     <input type="hidden" name="id" value="<?php echo $item['id']; ?>">

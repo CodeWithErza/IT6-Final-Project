@@ -80,11 +80,8 @@ unset($_SESSION['success'], $_SESSION['error']);
                             <!-- Add Category Form -->
                             <form action="/ERC-POS/handlers/categories/create.php" method="POST" class="mb-4">
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-10">
                                         <input type="text" name="name" class="form-control" placeholder="Category Name" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <input type="text" name="description" class="form-control" placeholder="Description (Optional)">
                                     </div>
                                     <div class="col-md-2">
                                         <button type="submit" class="btn btn-primary w-100">
@@ -100,7 +97,6 @@ unset($_SESSION['success'], $_SESSION['error']);
                                     <thead>
                                         <tr>
                                             <th>Name</th>
-                                            <th>Description</th>
                                             <th>Items Count</th>
                                             <th>Actions</th>
                                         </tr>
@@ -114,13 +110,11 @@ unset($_SESSION['success'], $_SESSION['error']);
                                         ?>
                                             <tr>
                                                 <td><?php echo htmlspecialchars($category['name']); ?></td>
-                                                <td><?php echo htmlspecialchars($category['description'] ?? ''); ?></td>
                                                 <td><?php echo $items_count; ?></td>
                                                 <td>
                                                     <button type="button" class="btn btn-sm btn-outline-primary edit-category" 
                                                             data-id="<?php echo $category['id']; ?>"
-                                                            data-name="<?php echo htmlspecialchars($category['name']); ?>"
-                                                            data-description="<?php echo htmlspecialchars($category['description'] ?? ''); ?>">
+                                                            data-name="<?php echo htmlspecialchars($category['name']); ?>">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     <?php if ($items_count === 0): ?>
@@ -218,11 +212,15 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             const id = this.dataset.id;
             const name = this.dataset.name;
-            const description = this.dataset.description;
             
-            // Create and show modal
-            const modal = new bootstrap.Modal(document.createElement('div'));
-            modal.element.innerHTML = `
+            // Create modal element
+            const modalElement = document.createElement('div');
+            modalElement.className = 'modal fade';
+            modalElement.id = 'editCategoryModal';
+            modalElement.setAttribute('tabindex', '-1');
+            modalElement.setAttribute('aria-hidden', 'true');
+            
+            modalElement.innerHTML = `
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -236,10 +234,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <label class="form-label">Name</label>
                                     <input type="text" name="name" class="form-control" value="${name}" required>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Description</label>
-                                    <input type="text" name="description" class="form-control" value="${description}">
-                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -249,8 +243,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
             `;
-            document.body.appendChild(modal.element);
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('editCategoryModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to document
+            document.body.appendChild(modalElement);
+            
+            // Initialize and show modal
+            const modal = new bootstrap.Modal(modalElement);
             modal.show();
+            
+            // Remove modal from DOM after it's hidden
+            modalElement.addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
         });
     });
 
@@ -261,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const id = this.dataset.id;
             const name = this.dataset.name;
             
-            if (confirm(`Are you sure you want to delete the category "${name}"?`)) {
+            if (confirm(`Are you sure you want to delete the category "${name}"? This action cannot be undone.`)) {
                 window.location.href = `/ERC-POS/handlers/categories/delete.php?id=${id}`;
             }
         });

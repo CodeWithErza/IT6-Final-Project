@@ -15,7 +15,6 @@ try {
     // Validate and sanitize input
     $id = intval($_POST['id'] ?? 0);
     $name = trim($_POST['name'] ?? '');
-    $description = trim($_POST['description'] ?? '');
 
     if (empty($id)) {
         throw new Exception('Category ID is required');
@@ -41,8 +40,8 @@ try {
     }
 
     // Update category
-    $stmt = $conn->prepare("UPDATE categories SET name = ?, description = ? WHERE id = ?");
-    $stmt->execute([$name, $description, $id]);
+    $stmt = $conn->prepare("UPDATE categories SET name = ? WHERE id = ?");
+    $stmt->execute([$name, $id]);
 
     // Log the action
     log_audit(
@@ -50,8 +49,8 @@ try {
         'update',
         'categories',
         $id,
-        ['name' => $category['name'], 'description' => $category['description']],
-        ['name' => $name, 'description' => $description]
+        ['name' => $category['name']],
+        ['name' => $name]
     );
 
     $_SESSION['success'] = "Category updated successfully!";
