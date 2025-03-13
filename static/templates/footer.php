@@ -34,9 +34,14 @@
                 const target = document.querySelector(this.getAttribute('data-bs-target'));
                 if (target) {
                     // Use Bootstrap's API to toggle the collapse
-                    const bsCollapse = new bootstrap.Collapse(target, {
-                        toggle: true
-                    });
+                    const bsCollapse = bootstrap.Collapse.getInstance(target);
+                    if (bsCollapse) {
+                        bsCollapse.toggle();
+                    } else {
+                        new bootstrap.Collapse(target, {
+                            toggle: true
+                        });
+                    }
                 }
             });
         });
@@ -52,8 +57,8 @@
 
     <style>
     .footer {
-        background-color: #f8f9fa;
-        border-top: 1px solid #e9ecef;
+        background-color: #ffffff;
+        border-top: 2px solid var(--secondary-color);
         position: fixed;
         bottom: 0;
         width: 100%;
@@ -62,6 +67,16 @@
         z-index: 1000;
         margin-left: 220px;
         width: calc(100% - 220px);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .footer p {
+        color: #6c757d;
+        transition: color 0.3s ease;
+    }
+    
+    .footer p:hover {
+        color: var(--primary-color);
     }
     
     @media (max-width: 768px) {

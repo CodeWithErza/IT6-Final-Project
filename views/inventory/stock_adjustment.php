@@ -77,12 +77,15 @@ unset($_SESSION['success'], $_SESSION['error']);
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-md-6">
-            <h1 class="h2">Stock Adjustments</h1>
+            <h1 class="h2">
+                <i class="fas fa-balance-scale me-2"></i>
+                Stock Adjustments
+            </h1>
             <p class="text-muted">Manage inventory adjustments and corrections</p>
         </div>
         <div class="col-md-6 text-end">
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#adjustStockModal">
-                <i class="fas fa-balance-scale"></i> New Adjustment
+                <i class="fas fa-balance-scale me-2"></i>New Adjustment
             </button>
         </div>
     </div>

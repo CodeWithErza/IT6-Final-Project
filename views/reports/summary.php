@@ -150,8 +150,11 @@ $total_expenses = $total_inventory_expenses + $total_general_expenses;
 $net_profit = $total_sales - $total_expenses;
 ?>
 
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Summary Report</h1>
+<div class="container-fluid py-4">
+    <h1 class="mt-4">
+        <i class="fas fa-chart-line"></i>
+        Summary Report
+    </h1>
     
     <!-- Filters -->
     <div class="card mb-4 shadow-sm">

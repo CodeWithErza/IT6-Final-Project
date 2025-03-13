@@ -68,8 +68,11 @@ $error = $_SESSION['error'] ?? '';
 unset($_SESSION['success'], $_SESSION['error']);
 ?>
 
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Expenses Management</h1>
+<div class="container-fluid py-4">
+    <h1 class="h2">
+        <i class="fas fa-file-invoice-dollar me-2"></i>
+        Expenses Management
+    </h1>
     <p class="text-muted">Manage all expenses including ingredients (like eggs, spices, etc.), utilities, rent, salaries, and other operational costs. For inventory items that need stock tracking, please use the <a href="/ERC-POS/views/inventory/stock_in.php">Stock In</a> functionality.</p>
 
     <?php if ($success): ?>

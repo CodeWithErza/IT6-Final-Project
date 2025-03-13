@@ -51,7 +51,10 @@ unset($_SESSION['success'], $_SESSION['error']);
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-md-6">
-            <h1 class="h2">Settings</h1>
+            <h1 class="h2">
+                <i class="fas fa-cog"></i>
+                Settings
+            </h1>
         </div>
     </div>
 

@@ -26,6 +26,30 @@ check_login();
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+    <!-- Fix for Bootstrap Dropdowns -->
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            // Ensure Bootstrap is properly loaded
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap is not loaded properly!');
+                // Try to load it again
+                var script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js';
+                document.head.appendChild(script);
+            } else {
+                console.log('Bootstrap loaded successfully:', bootstrap.Collapse.VERSION);
+            }
+            
+            // Initialize all dropdowns and collapses
+            setTimeout(function() {
+                document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function(element) {
+                    new bootstrap.Collapse(element, {
+                        toggle: false
+                    });
+                });
+            }, 500);
+        });
+    </script>
 </head>
 <body>
     <!-- Debug output -->
@@ -77,18 +101,19 @@ check_login();
     <div class="container-fluid">
         <div class="row">
             <?php include __DIR__ . '/sidebar.php'; ?>
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-2">
                 <!-- Content will be injected here -->
 
 <style>
 /* Header styles */
 .header-bar {
     background: #ffffff;
-    height: 70px;
+    height: 60px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 0 1.5rem;
     width: 100%;
     z-index: 1030; /* Lower than sidebar */
+    border-bottom: 3px solid var(--primary-color);
 }
 
 .header-content {
@@ -109,15 +134,18 @@ check_login();
     border-radius: 8px;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-left: 3px solid var(--primary-color);
 }
 
 .date-box:hover, .time-box:hover {
     background: #e9ecef;
     transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .date-box i, .time-box i {
-    color: #4a90e2;
+    color: var(--primary-color);
+    font-size: 1.1rem;
 }
 
 /* User Profile styles */
@@ -132,15 +160,18 @@ check_login();
     border-radius: 8px;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-left: 3px solid var(--accent-color);
+    font-weight: 600;
 }
 
 .user-profile .dropdown-toggle:hover {
     background: #e9ecef;
     transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .user-avatar i {
-    color: #4a90e2;
+    color: var(--primary-color);
     font-size: 1.2rem;
 }
 
@@ -148,23 +179,37 @@ check_login();
     border: none;
     border-radius: 10px;
     margin-top: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     z-index: 1031; /* Higher than header but lower than sidebar */
+    overflow: hidden;
 }
 
 .dropdown-item {
     padding: 0.7rem 1.2rem;
     transition: all 0.2s ease;
+    font-weight: 500;
 }
 
 .dropdown-item:hover {
-    background: #f8f9fa;
+    background: var(--secondary-color);
     transform: translateX(5px);
+    color: #333;
+}
+
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+    margin-right: 8px;
+}
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* Adjust main content */
 main {
-    padding-top: 90px;
+    padding-top: 65px;
 }
 
 /* Responsive adjustments */

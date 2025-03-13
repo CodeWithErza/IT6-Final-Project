@@ -11,8 +11,12 @@ CREATE TABLE users (
     role ENUM('admin', 'staff') NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by INT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    last_login TIMESTAMP NULL
+    updated_by INT,
+    last_login TIMESTAMP NULL,
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
 -- Settings table
@@ -26,7 +30,11 @@ CREATE TABLE settings (
     description TEXT,
     help_text TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    created_by INT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
 -- Categories table
@@ -35,7 +43,10 @@ CREATE TABLE categories (
     name VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INT,
-    FOREIGN KEY (created_by) REFERENCES users(id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
 -- Menu items table
@@ -49,10 +60,12 @@ CREATE TABLE menu_items (
     is_active BOOLEAN DEFAULT TRUE,
     image_url VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by INT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
     FOREIGN KEY (category_id) REFERENCES categories(id),
-    FOREIGN KEY (created_by) REFERENCES users(id)
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
 -- Orders table
@@ -71,8 +84,11 @@ CREATE TABLE orders (
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (created_by) REFERENCES users(id)
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
 -- Order items table
@@ -86,9 +102,12 @@ CREATE TABLE order_items (
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (menu_item_id) REFERENCES menu_items(id),
-    FOREIGN KEY (created_by) REFERENCES users(id)
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
 -- Inventory transactions table
@@ -101,10 +120,13 @@ CREATE TABLE inventory_transactions (
     notes TEXT,
     supplier VARCHAR(100),
     invoice_number VARCHAR(50),
-    created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by INT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
     FOREIGN KEY (menu_item_id) REFERENCES menu_items(id),
-    FOREIGN KEY (created_by) REFERENCES users(id)
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
 -- Expenses table
@@ -116,8 +138,11 @@ CREATE TABLE expenses (
     user_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (created_by) REFERENCES users(id)
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
 -- Audit log table
@@ -130,7 +155,12 @@ CREATE TABLE audit_log (
     old_values TEXT,
     new_values TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    created_by INT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
 -- Insert default settings

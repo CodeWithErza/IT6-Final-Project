@@ -61,7 +61,10 @@ unset($_SESSION['success'], $_SESSION['error']);
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-md-6">
-            <h1 class="h2">Menu Items</h1>
+            <h1 class="h2">
+                <i class="fas fa-utensils me-2"></i>
+                Menu Items
+            </h1>
         </div>
         <div class="col-md-6 text-end">
             <a href="/ERC-POS/views/menu/create.php" class="btn btn-primary">
@@ -191,18 +194,18 @@ unset($_SESSION['success'], $_SESSION['error']);
                             <thead class="table-light">
                                 <tr>
                                     <th>Image</th>
-                                    <th>Name</th>
-                                    <th>Price</th>
-                                    <th>Stock</th>
-                                    <th>Status</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
                                     <th class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        </tr>
+                    </thead>
+                    <tbody>
                                 <?php foreach ($category['items'] as $item): ?>
-                                    <tr>
-                                        <td>
-                                            <img src="<?php 
+                            <tr>
+                                <td>
+                                    <img src="<?php 
                                                 $image_path = $item['image_path'] 
                                                     ? $item['image_path'] 
                                                     : 'assets/images/no_image placeholder.png';
@@ -210,34 +213,34 @@ unset($_SESSION['success'], $_SESSION['error']);
                                                     $image_path = '/' . $image_path;
                                                 }
                                                 echo '/ERC-POS' . $image_path;
-                                            ?>" 
-                                                 class="img-thumbnail" 
+                                        ?>" 
+                                         class="img-thumbnail" 
                                                  style="width: 50px; height: 50px; object-fit: cover;"
                                                  onerror="this.src='/ERC-POS/assets/images/no_image placeholder.png'">
-                                        </td>
+                                </td>
                                         <td class="fw-medium"><?php echo htmlspecialchars($item['name']); ?></td>
-                                        <td>₱<?php echo number_format($item['price'], 2); ?></td>
-                                        <td>
-                                            <?php if ($item['is_inventory_item']): ?>
+                                <td>₱<?php echo number_format($item['price'], 2); ?></td>
+                                <td>
+                                    <?php if ($item['is_inventory_item']): ?>
                                                 <span class="badge bg-info">
-                                                    <?php echo number_format($item['current_stock']); ?>
+                                        <?php echo number_format($item['current_stock']); ?>
                                                 </span>
-                                            <?php else: ?>
+                                    <?php else: ?>
                                                 <span class="badge bg-secondary">N/A</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <form action="/ERC-POS/handlers/menu/toggle_status.php" method="POST" class="d-inline">
+                                        <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
+                                        <button type="submit" class="btn btn-sm btn-link p-0 text-decoration-none">
+                                            <?php if ($item['is_active']): ?>
+                                                <span class="badge bg-success">Active</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-danger">Inactive</span>
                                             <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <form action="/ERC-POS/handlers/menu/toggle_status.php" method="POST" class="d-inline">
-                                                <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
-                                                <button type="submit" class="btn btn-sm btn-link p-0 text-decoration-none">
-                                                    <?php if ($item['is_active']): ?>
-                                                        <span class="badge bg-success">Active</span>
-                                                    <?php else: ?>
-                                                        <span class="badge bg-danger">Inactive</span>
-                                                    <?php endif; ?>
-                                                </button>
-                                            </form>
-                                        </td>
+                                        </button>
+                                    </form>
+                                </td>
                                         <td class="text-end">
                                             <div class="btn-group">
                                                 <button type="button" 
@@ -251,21 +254,21 @@ unset($_SESSION['success'], $_SESSION['error']);
                                                        data-item-stock="<?php echo $item['current_stock']; ?>"
                                                        data-item-image="<?php echo $item['image_path'] ? '/ERC-POS/' . $item['image_path'] : '/ERC-POS/assets/images/no_image placeholder.png'; ?>"
                                                        onclick="openEditModal(this)">
-                                                    <i class="fas fa-edit"></i>
+                                        <i class="fas fa-edit"></i>
                                                 </button>
-                                                <form action="/ERC-POS/handlers/menu/delete.php" method="POST" class="d-inline" 
-                                                      onsubmit="return confirm('Are you sure you want to delete this menu item? This action cannot be undone.');">
-                                                    <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
-                                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                    <form action="/ERC-POS/handlers/menu/delete.php" method="POST" class="d-inline" 
+                                          onsubmit="return confirm('Are you sure you want to delete this menu item? This action cannot be undone.');">
+                                        <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                             </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>

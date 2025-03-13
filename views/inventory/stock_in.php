@@ -71,12 +71,15 @@ unset($_SESSION['success'], $_SESSION['error']);
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-md-6">
-            <h1 class="h2">Stock In Transactions</h1>
+            <h1 class="h2">
+                <i class="fas fa-arrow-circle-down me-2"></i>
+                Stock In Transactions
+            </h1>
             <p class="text-muted">View and manage all stock purchases and additions</p>
         </div>
         <div class="col-md-6 text-end">
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStockModal">
-                <i class="fas fa-plus"></i> Add New Stock
+                <i class="fas fa-plus me-2"></i>Add New Stock
             </button>
         </div>
     </div>

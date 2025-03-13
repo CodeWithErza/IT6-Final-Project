@@ -246,7 +246,10 @@ function image_exists($path) {
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0">Stock Levels</h4>
+        <h1 class="h2">
+            <i class="fas fa-box me-2"></i>
+            Stock Levels
+        </h1>
     </div>
 
     <?php if ($success): ?>

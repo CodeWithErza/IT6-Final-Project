@@ -36,7 +36,7 @@ try {
         log_audit($user['id'], 'login', 'users', $user['id']);
 
         // Redirect to dashboard or saved redirect URL
-        $redirect_url = $_SESSION['redirect_url'] ?? '/ERC-POS/views/dashboard/index.php';
+        $redirect_url = $_SESSION['redirect_url'] ?? '/ERC-POS/index.php';
         unset($_SESSION['redirect_url']); // Clear the saved URL
         
         header("Location: " . $redirect_url);

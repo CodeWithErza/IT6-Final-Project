@@ -135,8 +135,11 @@ usort($all_expenses, function($a, $b) {
 });
 ?>
 
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Comprehensive Expenses Report</h1>
+<div class="container-fluid py-4">
+    <h1 class="h2">
+        <i class="fas fa-file-invoice-dollar me-2"></i>
+        Comprehensive Expenses Report
+    </h1>
     <p class="text-muted">Track all expenses including inventory purchases, ingredients, utilities, and other operational costs</p>
     
     <!-- Filters -->

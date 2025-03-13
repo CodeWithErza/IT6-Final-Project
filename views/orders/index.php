@@ -60,7 +60,10 @@ unset($_SESSION['success'], $_SESSION['error']);
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-md-6">
-            <h1 class="h2">Orders</h1>
+            <h1 class="h2">
+                <i class="fas fa-receipt me-2"></i>
+                Order History
+            </h1>
         </div>
         <div class="col-md-6 text-end">
         </div>
