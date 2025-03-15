@@ -25,7 +25,7 @@ $params = [];
 if ($menu_item_id) {
     $query .= " AND it.menu_item_id = ?";
     $params[] = $menu_item_id;
-}
+};
 
 if ($date_from) {
     $query .= " AND DATE(it.created_at) >= ?";
@@ -287,7 +287,7 @@ const itemStocks = {
     <?php foreach ($menu_items as $item): ?>
     <?php echo $item['id']; ?>: <?php echo $item['current_stock']; ?>,
     <?php endforeach; ?>
-};
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize DataTable
