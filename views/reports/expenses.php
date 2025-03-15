@@ -123,6 +123,7 @@ foreach ($general_expenses as $expense) {
         'notes' => $expense['notes'],
         'created_by' => $expense['created_by'],
         'source' => 'general',
+        'id' => $expense['id'],
         'details' => [
             'has_items' => strpos($expense['notes'], 'ITEMS INCLUDED:') !== false
         ]
@@ -283,7 +284,7 @@ usort($all_expenses, function($a, $b) {
                                 <td><?php echo htmlspecialchars($expense['created_by']); ?></td>
                                 <td>
                                     <?php if ($expense['source'] === 'general'): ?>
-                                        <a href="/ERC-POS/views/expenses/view.php?id=<?php echo $expense['id'] ?? ''; ?>" class="btn btn-sm btn-info">
+                                        <a href="http://localhost/ERC-POS/views/expenses/view.php?id=<?php echo $expense['id']; ?>" class="btn btn-sm btn-info">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     <?php else: ?>

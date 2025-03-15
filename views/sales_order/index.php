@@ -5,34 +5,31 @@ include __DIR__ . '/../../static/templates/header.php';
 // Get all categories
 $stmt = $conn->prepare("
     SELECT * FROM categories 
+    WHERE is_active = 1
     ORDER BY name ASC
 ");
 $stmt->execute();
 $categories = $stmt->fetchAll();
 
-// Get menu items with current stock levels
-$stmt = $conn->prepare("
-    SELECT 
-        m.*,
-        c.name as category_name,
-        COALESCE(
-            (SELECT SUM(
-                CASE 
-                    WHEN transaction_type = 'stock_in' OR transaction_type = 'adjustment' THEN quantity
-                    WHEN transaction_type = 'stock_out' THEN -quantity
-                END
-            )
-            FROM inventory_transactions 
-            WHERE menu_item_id = m.id
-            ), 0
-        ) as current_stock
-    FROM menu_items m
-    LEFT JOIN categories c ON m.category_id = c.id
-    WHERE m.is_active = 1
-    ORDER BY m.category_id, m.name
-");
+// Get menu items with stock info
+$stmt = $conn->prepare("CALL sp_get_menu_items_for_sale()");
 $stmt->execute();
 $menu_items = $stmt->fetchAll();
+
+// Get business settings for receipt
+$stmt = $conn->prepare("
+    SELECT setting_name, setting_value 
+    FROM settings 
+    WHERE setting_group IN ('business', 'system', 'receipt')
+");
+$stmt->execute();
+$settings_result = $stmt->fetchAll();
+
+// Convert settings to associative array
+$settings = [];
+foreach ($settings_result as $setting) {
+    $settings[$setting['setting_name']] = $setting['setting_value'];
+}
 
 // Get messages
 $success = $_SESSION['success'] ?? '';
@@ -560,6 +557,9 @@ unset($_SESSION['success'], $_SESSION['error']);
 </style>
 
 <script>
+    // Business settings for receipt
+    const businessSettings = <?php echo json_encode($settings); ?>;
+
     // Initialize order items Map
     const orderItems = new Map();
     
@@ -821,8 +821,36 @@ unset($_SESSION['success'], $_SESSION['error']);
 
     // Function to show receipt
     function showReceipt(orderNumber, orderData) {
+        // Get business settings from a global variable or fetch them
+        // For now, we'll use default values
+        const settings = {
+            business_name: 'ERC Carinderia',
+            business_address: '',
+            business_phone: '',
+            receipt_footer: 'Thank you for dining with us!'
+        };
+
+        // Try to get settings from PHP if available
+        if (typeof businessSettings !== 'undefined') {
+            Object.assign(settings, businessSettings);
+        }
+
         const receiptModal = document.createElement('div');
         receiptModal.className = 'modal fade';
+        receiptModal.id = 'dynamicReceiptModal';
+        
+        // Format date
+        const orderDate = new Date();
+        const formattedDate = orderDate.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        
+        // Create receipt HTML
         receiptModal.innerHTML = `
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -831,62 +859,172 @@ unset($_SESSION['success'], $_SESSION['error']);
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="text-center mb-3">
-                            <h4>ERC Restaurant</h4>
-                            <p class="mb-1">Order #${orderNumber}</p>
-                            <p class="mb-1">${new Date().toLocaleString()}</p>
-                        </div>
-                        <div class="border-top border-bottom py-3 mb-3">
-                            ${Array.from(orderItems.entries()).map(([id, item]) => `
-                                <div class="d-flex justify-content-between mb-2">
-                                    <div>
-                                        <div>${item.name}</div>
-                                        <div class="text-muted small">₱${item.price.toFixed(2)} × ${item.quantity}</div>
+                        <div id="receipt-content">
+                            <div class="text-center mb-3">
+                                <img src="/ERC-POS/assets/images/ERC Logo.png" alt="Business Logo" style="max-width: 80px; margin-bottom: 10px;">
+                                <h4>${settings.business_name}</h4>
+                                ${settings.business_address ? `<p class="mb-1">${settings.business_address}</p>` : ''}
+                                ${settings.business_phone ? `<p class="mb-1">${settings.business_phone}</p>` : ''}
+                                <p class="mb-1">Order #${orderNumber}</p>
+                                <p class="mb-1">${formattedDate}</p>
+                                <p class="mb-1">Cashier: ${document.querySelector('.user-profile .dropdown-toggle span')?.textContent || 'Staff'}</p>
+                            </div>
+                            <div class="border-top border-bottom py-3 mb-3">
+                                ${Array.from(orderItems.entries()).map(([id, item]) => `
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <div>
+                                            <div>${item.name}</div>
+                                            <div class="text-muted small">₱${parseFloat(item.price).toFixed(2)} × ${item.quantity}</div>
+                                        </div>
+                                        <div>₱${(parseFloat(item.price) * item.quantity).toFixed(2)}</div>
                                     </div>
-                                    <div>₱${(item.price * item.quantity).toFixed(2)}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Subtotal:</span>
-                                <span>₱${orderData.subtotal.toFixed(2)}</span>
+                                `).join('')}
                             </div>
-                            ${orderData.discount_amount > 0 ? `
+                            <div class="mb-3">
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span>Discount (${orderData.discount_type}):</span>
-                                    <span>-₱${orderData.discount_amount.toFixed(2)}</span>
+                                    <span>Subtotal:</span>
+                                    <span>₱${parseFloat(orderData.subtotal).toFixed(2)}</span>
                                 </div>
-                            ` : ''}
-                            <div class="d-flex justify-content-between mb-2">
-                                <strong>Total:</strong>
-                                <strong>₱${orderData.total.toFixed(2)}</strong>
+                                ${parseFloat(orderData.discount_amount) > 0 ? `
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Discount ${orderData.discount_type ? `(${orderData.discount_type})` : ''}:</span>
+                                        <span>-₱${parseFloat(orderData.discount_amount).toFixed(2)}</span>
+                                    </div>
+                                ` : ''}
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong>Total:</strong>
+                                    <strong>₱${parseFloat(orderData.total).toFixed(2)}</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Amount Received:</span>
+                                    <span>₱${parseFloat(orderData.amount_received).toFixed(2)}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Change:</span>
+                                    <span>₱${parseFloat(orderData.change).toFixed(2)}</span>
+                                </div>
+                                ${orderData.payment_method !== 'cash' ? `
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <span>Payment Method:</span>
+                                        <span>${orderData.payment_method.toUpperCase()}</span>
+                                    </div>
+                                ` : ''}
+                                ${orderData.notes ? `
+                                    <div class="mt-2">
+                                        <span>Notes:</span>
+                                        <p class="small mt-1">${orderData.notes}</p>
+                                    </div>
+                                ` : ''}
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Amount Received:</span>
-                                <span>₱${orderData.amount_received.toFixed(2)}</span>
+                            <div class="text-center">
+                                <p class="mb-1">${settings.receipt_footer}</p>
+                                <p class="small text-muted mb-0">Please come again</p>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Change:</span>
-                                <span>₱${orderData.change.toFixed(2)}</span>
-                            </div>
-                        </div>
-                        <div class="text-center">
-                            <p class="mb-1">Thank you for dining with us!</p>
-                            <p class="small text-muted mb-0">Please come again</p>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" onclick="window.print()">Print Receipt</button>
+                        <button type="button" class="btn btn-primary" id="printReceiptBtn">
+                            <i class="fas fa-print me-2"></i>Print Receipt
+                        </button>
                     </div>
                 </div>
             </div>
         `;
+        
         document.body.appendChild(receiptModal);
         
         const modal = new bootstrap.Modal(receiptModal);
         modal.show();
+        
+        // Print receipt
+        document.getElementById('printReceiptBtn').addEventListener('click', function() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Order Receipt</title>
+                        <style>
+                            body {
+                                font-family: 'Courier New', monospace;
+                                font-size: 12px;
+                                line-height: 1.4;
+                                margin: 0;
+                                padding: 20px;
+                            }
+                            .receipt-container {
+                                width: 80mm;
+                                margin: 0 auto;
+                            }
+                            .text-center {
+                                text-align: center;
+                            }
+                            .mb-1 {
+                                margin-bottom: 5px;
+                            }
+                            .mb-2 {
+                                margin-bottom: 10px;
+                            }
+                            .mb-3 {
+                                margin-bottom: 15px;
+                            }
+                            .mt-1 {
+                                margin-top: 5px;
+                            }
+                            .mt-2 {
+                                margin-top: 10px;
+                            }
+                            .py-3 {
+                                padding-top: 15px;
+                                padding-bottom: 15px;
+                            }
+                            .border-top {
+                                border-top: 1px dashed #ccc;
+                            }
+                            .border-bottom {
+                                border-bottom: 1px dashed #ccc;
+                            }
+                            .d-flex {
+                                display: flex;
+                            }
+                            .justify-content-between {
+                                justify-content: space-between;
+                            }
+                            .text-muted {
+                                color: #6c757d;
+                            }
+                            .small {
+                                font-size: 10px;
+                            }
+                            img {
+                                max-width: 80px;
+                                height: auto;
+                                margin-bottom: 10px;
+                            }
+                            h4 {
+                                font-size: 16px;
+                                margin: 5px 0;
+                            }
+                            p {
+                                margin: 3px 0;
+                            }
+                            strong {
+                                font-weight: bold;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="receipt-container">
+                            ${document.getElementById('receipt-content').innerHTML}
+                        </div>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        });
         
         receiptModal.addEventListener('hidden.bs.modal', function() {
             document.body.removeChild(receiptModal);
@@ -900,15 +1038,16 @@ unset($_SESSION['success'], $_SESSION['error']);
             body * {
                 visibility: hidden;
             }
-            .modal-content * {
+            #dynamicReceiptModal .modal-content * {
                 visibility: visible;
             }
-            .modal-content {
+            #dynamicReceiptModal .modal-content {
                 position: absolute;
                 left: 0;
                 top: 0;
+                width: 100%;
             }
-            .modal-footer {
+            #dynamicReceiptModal .modal-footer {
                 display: none;
             }
         }

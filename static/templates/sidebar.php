@@ -10,8 +10,7 @@ echo "<!-- Debug: current_dir = " . htmlspecialchars($current_dir) . " -->\n";
 <nav id="sidebar" class="col-md-2 col-lg-2 d-md-block sidebar">
     <!-- Logo Section -->
     <div class="sidebar-logo text-center py-2">
-        <img src="/ERC-POS/assets/images/erc logo.png" alt="ERC Logo" class="img-fluid mb-1" style="max-width: 120px; height: auto;">
-        <h5 class="text-white">ERC POS</h5> 
+        <img src="/ERC-POS/assets/images/ERC Logo.png" alt="ERC Logo" class="img-fluid mb-1" style="max-width: 120px; height: auto;">
     </div>
 
     <div class="position-sticky">
@@ -61,13 +60,6 @@ echo "<!-- Debug: current_dir = " . htmlspecialchars($current_dir) . " -->\n";
                                href="/ERC-POS/views/inventory/index.php">
                                 <i class="fas fa-box me-2"></i>
                                 Stock Levels
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo $current_page === 'stock_in' ? 'active' : ''; ?>" 
-                               href="/ERC-POS/views/inventory/stock_in.php">
-                                <i class="fas fa-arrow-circle-down me-2"></i>
-                                Stock In
                             </a>
                         </li>
                         <li class="nav-item">

@@ -139,8 +139,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                         <?php foreach ($orders as $order): ?>
                             <tr>
                                 <td>
-                                    <a href="/ERC-POS/views/orders/view.php?id=<?php echo $order['id']; ?>" 
-                                       class="text-decoration-none">
+                                    <a href="#" class="text-decoration-none view-receipt" data-id="<?php echo $order['id']; ?>">
                                         <?php echo htmlspecialchars($order['order_number']); ?>
                                     </a>
                                 </td>
@@ -164,8 +163,8 @@ unset($_SESSION['success'], $_SESSION['error']);
                                 <td><?php echo htmlspecialchars($order['created_by_name']); ?></td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="/ERC-POS/views/orders/view.php?id=<?php echo $order['id']; ?>" 
-                                           class="btn btn-sm btn-info" 
+                                        <a href="#" class="btn btn-sm btn-info view-receipt" 
+                                           data-id="<?php echo $order['id']; ?>"
                                            title="View Order">
                                             <i class="fas fa-eye"></i>
                                         </a>
@@ -278,6 +277,237 @@ document.querySelectorAll('.cancel-order').forEach(function(button) {
         }
     });
 });
+
+// View Receipt
+document.querySelectorAll('.view-receipt').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const orderId = this.dataset.id;
+        
+        // Show loading spinner
+        const loadingSpinner = document.createElement('div');
+        loadingSpinner.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75';
+        loadingSpinner.style.zIndex = '9999';
+        loadingSpinner.innerHTML = `
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        `;
+        document.body.appendChild(loadingSpinner);
+        
+        // Fetch order data
+        fetch(`/ERC-POS/handlers/orders/get_order_data.php?id=${orderId}`)
+            .then(response => response.json())
+            .then(data => {
+                // Remove loading spinner
+                document.body.removeChild(loadingSpinner);
+                
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                // Show receipt modal
+                showReceipt(data.order, data.items, data.settings);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.body.removeChild(loadingSpinner);
+                alert('Error loading receipt');
+            });
+    });
+});
+
+// Function to show receipt
+function showReceipt(order, items, settings) {
+    const receiptModal = document.createElement('div');
+    receiptModal.className = 'modal fade';
+    receiptModal.id = 'dynamicReceiptModal';
+    
+    // Format date
+    const orderDate = new Date(order.created_at);
+    const formattedDate = orderDate.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
+    
+    // Create receipt HTML
+    receiptModal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Order Receipt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="receipt-content">
+                        <div class="text-center mb-3">
+                            ${settings.show_receipt_logo === '1' ? 
+                                `<img src="/ERC-POS/assets/images/ERC Logo.png" alt="Business Logo" style="max-width: 80px; margin-bottom: 10px;">` : ''}
+                            <h4>${settings.business_name || 'ERC Carinderia'}</h4>
+                            ${settings.business_address ? `<p class="mb-1">${settings.business_address}</p>` : ''}
+                            ${settings.business_phone ? `<p class="mb-1">${settings.business_phone}</p>` : ''}
+                            <p class="mb-1">Order #${order.order_number}</p>
+                            <p class="mb-1">${formattedDate}</p>
+                            <p class="mb-1">Cashier: ${order.created_by_name}</p>
+                        </div>
+                        <div class="border-top border-bottom py-3 mb-3">
+                            ${items.map(item => `
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div>
+                                        <div>${item.menu_item_name}</div>
+                                        <div class="text-muted small">₱${parseFloat(item.unit_price).toFixed(2)} × ${item.quantity}</div>
+                                    </div>
+                                    <div>₱${parseFloat(item.subtotal).toFixed(2)}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span>₱${parseFloat(order.subtotal_amount).toFixed(2)}</span>
+                            </div>
+                            ${parseFloat(order.discount_amount) > 0 ? `
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Discount ${order.discount_type ? `(${order.discount_type})` : ''}:</span>
+                                    <span>-₱${parseFloat(order.discount_amount).toFixed(2)}</span>
+                                </div>
+                            ` : ''}
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong>Total:</strong>
+                                <strong>₱${parseFloat(order.total_amount).toFixed(2)}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Amount Received:</span>
+                                <span>₱${parseFloat(order.cash_received).toFixed(2)}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Change:</span>
+                                <span>₱${parseFloat(order.cash_change).toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <p class="mb-1">${settings.receipt_footer || 'Thank you for your business!'}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="printReceiptBtn">
+                        <i class="fas fa-print me-2"></i>Print Receipt
+                    </button>
+                    <a href="/ERC-POS/views/orders/view.php?id=${order.id}" class="btn btn-info" target="_blank">
+                        <i class="fas fa-external-link-alt me-2"></i>View Full Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(receiptModal);
+    
+    const modal = new bootstrap.Modal(receiptModal);
+    modal.show();
+    
+    // Print receipt
+    document.getElementById('printReceiptBtn').addEventListener('click', function() {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Order Receipt</title>
+                    <style>
+                        body {
+                            font-family: 'Courier New', monospace;
+                            font-size: 12px;
+                            line-height: 1.4;
+                            margin: 0;
+                            padding: 20px;
+                        }
+                        .receipt-container {
+                            width: 80mm;
+                            margin: 0 auto;
+                        }
+                        .text-center {
+                            text-align: center;
+                        }
+                        .mb-1 {
+                            margin-bottom: 5px;
+                        }
+                        .mb-2 {
+                            margin-bottom: 10px;
+                        }
+                        .mb-3 {
+                            margin-bottom: 15px;
+                        }
+                        .py-3 {
+                            padding-top: 15px;
+                            padding-bottom: 15px;
+                        }
+                        .border-top {
+                            border-top: 1px dashed #ccc;
+                        }
+                        .border-bottom {
+                            border-bottom: 1px dashed #ccc;
+                        }
+                        .d-flex {
+                            display: flex;
+                        }
+                        .justify-content-between {
+                            justify-content: space-between;
+                        }
+                        .text-muted {
+                            color: #6c757d;
+                        }
+                        .small {
+                            font-size: 10px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt-container">
+                        ${document.getElementById('receipt-content').innerHTML}
+                    </div>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+    });
+    
+    receiptModal.addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(receiptModal);
+    });
+}
+
+// Add print styles
+const printStyles = document.createElement('style');
+printStyles.textContent = `
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #dynamicReceiptModal .modal-content * {
+            visibility: visible;
+        }
+        #dynamicReceiptModal .modal-content {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        #dynamicReceiptModal .modal-footer {
+            display: none;
+        }
+    }
+`;
+document.head.appendChild(printStyles);
 </script>
 
 <?php include __DIR__ . '/../../static/templates/footer.php'; ?> 

@@ -55,7 +55,8 @@ $categories = get_categories();
 // Get messages
 $success = $_SESSION['success'] ?? '';
 $error = $_SESSION['error'] ?? '';
-unset($_SESSION['success'], $_SESSION['error']);
+$warning = $_SESSION['warning'] ?? '';
+unset($_SESSION['success'], $_SESSION['error'], $_SESSION['warning']);
 ?>
 
 <div class="container-fluid py-4">
@@ -79,6 +80,10 @@ unset($_SESSION['success'], $_SESSION['error']);
 
     <?php if ($error): ?>
         <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+    <?php endif; ?>
+    
+    <?php if ($warning): ?>
+        <div class="alert alert-warning"><?php echo htmlspecialchars($warning); ?></div>
     <?php endif; ?>
 
     <!-- Filters -->

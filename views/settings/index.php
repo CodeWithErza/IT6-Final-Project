@@ -29,8 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if (isset($_POST['settings'])) {
             foreach ($_POST['settings'] as $id => $value) {
-                $stmt = $conn->prepare("UPDATE settings SET setting_value = ? WHERE id = ?");
-                $stmt->execute([$value, $id]);
+                $stmt = $conn->prepare("UPDATE settings SET setting_value = ?, updated_by = ? WHERE id = ?");
+                $stmt->execute([$value, $_SESSION['user_id'], $id]);
             }
         }
         
@@ -83,8 +83,14 @@ unset($_SESSION['success'], $_SESSION['error']);
                             <!-- Add Category Form -->
                             <form action="/ERC-POS/handlers/categories/create.php" method="POST" class="mb-4">
                                 <div class="row">
-                                    <div class="col-md-10">
+                                    <div class="col-md-8">
                                         <input type="text" name="name" class="form-control" placeholder="Category Name" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-check form-switch mt-2">
+                                            <input type="checkbox" class="form-check-input" name="is_active" id="newCategoryActive" checked>
+                                            <label class="form-check-label" for="newCategoryActive">Active</label>
+                                        </div>
                                     </div>
                                     <div class="col-md-2">
                                         <button type="submit" class="btn btn-primary w-100">
@@ -101,6 +107,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                                         <tr>
                                             <th>Name</th>
                                             <th>Items Count</th>
+                                            <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -115,9 +122,15 @@ unset($_SESSION['success'], $_SESSION['error']);
                                                 <td><?php echo htmlspecialchars($category['name']); ?></td>
                                                 <td><?php echo $items_count; ?></td>
                                                 <td>
+                                                    <span class="badge <?php echo $category['is_active'] ? 'bg-success' : 'bg-danger'; ?>">
+                                                        <?php echo $category['is_active'] ? 'Active' : 'Inactive'; ?>
+                                                    </span>
+                                                </td>
+                                                <td>
                                                     <button type="button" class="btn btn-sm btn-outline-primary edit-category" 
                                                             data-id="<?php echo $category['id']; ?>"
-                                                            data-name="<?php echo htmlspecialchars($category['name']); ?>">
+                                                            data-name="<?php echo htmlspecialchars($category['name']); ?>"
+                                                            data-active="<?php echo $category['is_active']; ?>">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     <?php if ($items_count === 0): ?>
@@ -215,6 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             const id = this.dataset.id;
             const name = this.dataset.name;
+            const active = this.dataset.active === '1';
             
             // Create modal element
             const modalElement = document.createElement('div');
@@ -236,6 +250,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="mb-3">
                                     <label class="form-label">Name</label>
                                     <input type="text" name="name" class="form-control" value="${name}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input type="checkbox" class="form-check-input" name="is_active" id="categoryActive" ${active ? 'checked' : ''}>
+                                        <label class="form-check-label" for="categoryActive">Active</label>
+                                    </div>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -281,5 +301,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<style>
+.accordion-body {
+    background-color: #ffffff;
+    padding: 1.5rem;
+}
+
+.accordion-button {
+    background-color: #f8f9fa;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(0, 0, 0, 0.125);
+}
+</style>
 
 <?php require_once __DIR__ . '/../../static/templates/footer.php'; ?> 

@@ -242,6 +242,371 @@ function image_exists($path) {
     .history-link:hover {
         background-color: #e9ecef;
     }
+    .cart-item {
+        background-color: #f8f9fa;
+        border-radius: 0.25rem;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        border-left: 3px solid var(--primary-color);
+    }
+    .cart-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+    .cart-item-name {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    .cart-item-details {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+    }
+    .cart-item-quantity, .cart-item-price {
+        color: #555;
+    }
+    .cart-item-total {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    .stock-in-cart-items {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .empty-cart-message {
+        color: #aaa;
+    }
+    #recentTransactionsTable th {
+        white-space: nowrap;
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+    #recentTransactionsTable td {
+        vertical-align: middle;
+    }
+    /* Stats Card Styles */
+    .stats-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        transition: transform 0.3s ease;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    .stats-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+    .stats-icon i {
+        font-size: 1.5rem;
+        color: #fff;
+    }
+    .stats-icon.primary {
+        background: var(--primary-color);
+    }
+    .stats-icon.accent {
+        background: var(--accent-color);
+    }
+    .stats-icon.highlight {
+        background: var(--highlight-color);
+    }
+    .stats-info {
+        flex: 1;
+    }
+    .stats-title {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    .stats-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    /* Filter Styles */
+    .select2-container--bootstrap-5 .select2-selection {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+    .select2-container--bootstrap-5 .select2-selection--single {
+        height: calc(1.5em + 0.75rem + 2px);
+        padding: 0.375rem 0.75rem;
+    }
+    /* DataTable Styles */
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 1rem;
+    }
+    .dataTables_wrapper .dt-buttons {
+        margin-bottom: 1rem;
+    }
+    .dt-button {
+        background: #f8f9fa !important;
+        border: 1px solid #dee2e6 !important;
+        border-radius: 0.25rem !important;
+        padding: 0.375rem 0.75rem !important;
+        margin-right: 0.5rem !important;
+    }
+    .dt-button:hover {
+        background: #e9ecef !important;
+    }
+    .summary-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    .summary-card:hover {
+        transform: translateY(-5px);
+    }
+    .summary-card .card-body {
+        padding: 1.5rem;
+    }
+    .summary-card .card-title {
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    .summary-card .card-text {
+        margin-bottom: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    #recentTransactionsTable th {
+        white-space: nowrap;
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+    #recentTransactionsTable td {
+        vertical-align: middle;
+    }
+    .dt-buttons {
+        margin-bottom: 1rem;
+    }
+    .dt-button {
+        background-color: #f8f9fa !important;
+        border: 1px solid #dee2e6 !important;
+        border-radius: 4px !important;
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.9rem !important;
+        margin-right: 0.5rem !important;
+    }
+    .dt-button:hover {
+        background-color: #e9ecef !important;
+        border-color: #dee2e6 !important;
+    }
+    /* Summary Cards */
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .summary-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .summary-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .summary-card.transactions {
+        border-left-color: var(--primary-color);
+    }
+
+    .summary-card.items {
+        border-left-color: var(--accent-color);
+    }
+
+    .summary-card.cost {
+        border-left-color: var(--highlight-color);
+    }
+
+    .summary-card .card-title {
+        color: #6c757d;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .summary-card .card-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0;
+    }
+
+    /* Stock-in Cart */
+    .stock-in-cart {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-left: 1rem;
+        position: sticky;
+        top: 80px;
+    }
+
+    .stock-in-cart .cart-header {
+        background: var(--primary-color);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px 10px 0 0;
+        font-weight: 600;
+    }
+
+    .cart-items {
+        padding: 1rem;
+        max-height: calc(100vh - 400px);
+        overflow-y: auto;
+    }
+
+    .cart-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 3px solid var(--accent-color);
+        transition: transform 0.2s ease;
+    }
+
+    .cart-item:hover {
+        transform: translateX(5px);
+    }
+
+    .cart-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .cart-item-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .cart-item-remove {
+        color: var(--primary-color);
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .cart-item-remove:hover {
+        color: #dc3545;
+    }
+
+    .cart-item-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .cart-item-detail {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .cart-item-label {
+        color: #6c757d;
+    }
+
+    .cart-item-value {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .cart-total {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-top: 1px solid #dee2e6;
+        border-radius: 0 0 10px 10px;
+    }
+
+    .cart-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .empty-cart-message {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+
+    .empty-cart-message i {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    /* Transaction Form */
+    .transaction-form {
+        background: #fff;
+        padding: 1rem;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .transaction-form .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .transaction-form label {
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+
+    .transaction-form .btn-primary {
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    /* Recent Transactions */
+    .recent-transactions {
+        margin-top: 2rem;
+    }
+
+    .recent-transactions .card-header {
+        background: var(--primary-color);
+        color: white;
+        font-weight: 600;
+    }
+
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .dataTables_wrapper .dataTables_length select:focus,
+    .dataTables_wrapper .dataTables_filter input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(210, 102, 95, 0.25);
+    }
 </style>
 
 <div class="container-fluid py-4">
@@ -260,11 +625,12 @@ function image_exists($path) {
         <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>
 
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Left Side - Stock Levels -->
+        <div class="col-lg-8">
     <!-- Top Action Buttons -->
     <div class="top-actions">
-        <a href="/ERC-POS/views/inventory/stock_in.php" style="background-color: #28a745;">
-            <i class="fas fa-arrow-circle-down"></i> Stock In
-        </a>
         <a href="/ERC-POS/views/inventory/stock_adjustment.php" style="background-color: #17a2b8;">
             <i class="fas fa-balance-scale"></i> Adjust Stock
         </a>
@@ -287,7 +653,7 @@ function image_exists($path) {
     </div>
 
     <!-- Inventory Items Grid -->
-    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4 mb-4">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4">
         <?php foreach ($inventory_items as $item): 
             // Determine stock level class
             $stock_class = 'stock-high';
@@ -342,13 +708,23 @@ function image_exists($path) {
                             <div class="item-stock-label">Stock</div>
                             <div class="item-stock-number"><?php echo number_format($item['current_stock']); ?></div>
                         </div>
-                        <a href="#" class="history-link" onclick="showItemHistory(<?php echo htmlspecialchars(json_encode([
+                                <div class="d-flex gap-2 mt-2">
+                                    <button class="btn btn-sm btn-primary add-to-cart-btn" 
+                                            onclick="addToCart(<?php echo htmlspecialchars(json_encode([
+                                                'id' => $item['id'],
+                                                'name' => $item['name'],
+                                                'currentStock' => $item['current_stock']
+                                            ])); ?>)">
+                                        <i class="fas fa-plus"></i> Add Stock
+                                    </button>
+                                    <a href="#" class="btn btn-sm btn-outline-secondary" onclick="showItemHistory(<?php echo htmlspecialchars(json_encode([
                             'id' => $item['id'],
                             'name' => $item['name'],
                             'history' => $history_data[$item['id']] ?? []
                         ])); ?>)">
-                            <i class="fas fa-history"></i> View History
+                                        <i class="fas fa-history"></i>
                         </a>
+                                </div>
                     </div>
                 </div>
             </div>
@@ -356,113 +732,207 @@ function image_exists($path) {
     </div>
 </div>
 
-<!-- Add Stock Modal -->
-<div class="modal fade" id="addStockModal" tabindex="-1" aria-labelledby="addStockModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addStockModalLabel">Add Stock</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Right Side - Stock-In Cart -->
+        <div class="col-lg-4">
+            <div class="stock-in-cart">
+                <div class="cart-header">
+                    <i class="fas fa-shopping-cart me-2"></i>Stock-In Cart
             </div>
-            <div class="modal-body">
-                <form action="/ERC-POS/handlers/inventory/add_stock.php" method="POST" id="addStockForm">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="menu_item_id" class="form-label">Menu Item</label>
-                            <select class="form-select" id="menu_item_id" name="menu_item_id" required>
-                            <option value="">Select Item</option>
-                            <?php foreach ($inventory_items as $item): ?>
-                                    <option value="<?php echo $item['id']; ?>">
-                                    <?php echo htmlspecialchars($item['name']); ?> (Current: <?php echo $item['current_stock']; ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                <div class="cart-items">
+                    <!-- Cart items will be added here dynamically -->
+                    <div class="empty-cart-message">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>No items in cart. Click "Add Stock" on any item to add it to the cart.</p>
                     </div>
-                        <div class="col-md-6">
-                            <label for="quantity" class="form-label">Quantity</label>
-                            <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
                         </div>
+
+                <!-- Transaction Form -->
+                <div class="transaction-form">
+                    <form id="stockInForm" action="/ERC-POS/handlers/inventory/add_stock.php" method="POST">
+                        <input type="hidden" id="cart_items" name="cart_items" value="">
+                        
+                        <div class="form-group">
+                            <label for="transaction_date">Transaction Date</label>
+                            <input type="datetime-local" class="form-control" id="transaction_date" name="transaction_date" 
+                                   value="<?php echo date('Y-m-d\TH:i'); ?>" required>
                     </div>
-                    <div class="row mb-3">
+                        
+                        <div class="row">
                         <div class="col-md-6">
-                            <label for="unit_price" class="form-label">Unit Price</label>
-                            <div class="input-group">
-                                <span class="input-group-text">₱</span>
-                                <input type="number" class="form-control" id="unit_price" name="unit_price" min="0" step="0.01" required>
+                                <div class="form-group">
+                                    <label for="supplier">Supplier</label>
+                                    <input type="text" class="form-control" id="supplier" name="supplier">
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label for="transaction_date" class="form-label">Transaction Date</label>
-                            <input type="datetime-local" class="form-control" id="transaction_date" name="transaction_date" 
-                                   value="<?php echo date('Y-m-d\TH:i'); ?>">
+                                <div class="form-group">
+                                    <label for="invoice_number">Invoice Number</label>
+                                    <input type="text" class="form-control" id="invoice_number" name="invoice_number">
                         </div>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="supplier" class="form-label">Supplier</label>
-                            <input type="text" class="form-control" id="supplier" name="supplier">
                         </div>
-                        <div class="col-md-6">
-                            <label for="invoice_number" class="form-label">Invoice Number</label>
-                            <input type="text" class="form-control" id="invoice_number" name="invoice_number">
+                        
+                        <div class="form-group">
+                            <label for="notes">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
                         </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" id="submitStockIn" disabled>
+                                <i class="fas fa-save me-2"></i>Save Stock-In Transaction
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="clearCart()">
+                                <i class="fas fa-trash me-2"></i>Clear Cart
+                            </button>
                     </div>
-                    <div class="mb-3">
-                        <label for="notes" class="form-label">Notes</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Stock-In Transactions -->
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-history me-2"></i>Recent Stock-In Transactions
+            </h5>
+            <a href="/ERC-POS/views/inventory/history.php" class="btn btn-sm btn-outline-primary">
+                View All History
+            </a>
+        </div>
+        <div class="card-body">
+            <!-- Filter Form -->
+            <form method="GET" class="row g-3 mb-4" id="stockInFilterForm">
+                <div class="col-md-3">
+                    <label for="filter_menu_item" class="form-label">Menu Item</label>
+                    <select class="form-select" id="filter_menu_item" name="filter_menu_item">
+                        <option value="">All Items</option>
+                        <?php foreach ($inventory_items as $item): ?>
+                            <option value="<?php echo $item['id']; ?>">
+                                <?php echo htmlspecialchars($item['name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="filter_date_from" class="form-label">Date From</label>
+                    <input type="date" class="form-control" id="filter_date_from" name="filter_date_from">
+                </div>
+                <div class="col-md-3">
+                    <label for="filter_date_to" class="form-label">Date To</label>
+                    <input type="date" class="form-control" id="filter_date_to" name="filter_date_to">
+                </div>
+                <div class="col-md-3">
+                    <label for="filter_supplier" class="form-label">Supplier</label>
+                    <input type="text" class="form-control" id="filter_supplier" name="filter_supplier">
                     </div>
                 </form>
+
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="summary-card transactions">
+                    <h6 class="card-title">
+                        <i class="fas fa-exchange-alt me-2"></i>Total Transactions
+                    </h6>
+                    <p class="card-value" id="totalTransactions">0</p>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" form="addStockForm" class="btn btn-primary">Add Stock</button>
+                <div class="summary-card items">
+                    <h6 class="card-title">
+                        <i class="fas fa-boxes me-2"></i>Total Items Added
+                    </h6>
+                    <p class="card-value" id="totalItems">0</p>
+            </div>
+                <div class="summary-card cost">
+                    <h6 class="card-title">
+                        <i class="fas fa-money-bill-wave me-2"></i>Total Cost
+                    </h6>
+                    <p class="card-value" id="totalCost">₱0.00</p>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="table-responsive">
+                <table class="table table-hover" id="recentTransactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total Cost</th>
+                            <th>Supplier</th>
+                            <th>Invoice #</th>
+                            <th>Added By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        // Get recent stock-in transactions
+                        $transactions_query = "
+                            SELECT 
+                                it.*,
+                                m.name as item_name,
+                                u.username as username
+                            FROM inventory_transactions it
+                            JOIN menu_items m ON it.menu_item_id = m.id
+                            LEFT JOIN users u ON it.created_by = u.id
+                            WHERE it.transaction_type = 'stock_in'
+                            ORDER BY it.created_at DESC
+                            LIMIT 100
+                        ";
+                        $transactions = $conn->query($transactions_query)->fetchAll();
+                        
+                        foreach ($transactions as $transaction):
+                            $total_cost = $transaction['quantity'] * $transaction['unit_price'];
+                        ?>
+                            <tr>
+                                <td><?php echo date('Y-m-d g:i A', strtotime($transaction['created_at'])); ?></td>
+                                <td><?php echo htmlspecialchars($transaction['item_name']); ?></td>
+                                <td><?php echo number_format($transaction['quantity']); ?></td>
+                                <td>₱<?php echo number_format($transaction['unit_price'], 2); ?></td>
+                                <td>₱<?php echo number_format($total_cost, 2); ?></td>
+                                <td><?php echo htmlspecialchars($transaction['supplier'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($transaction['invoice_number'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($transaction['username'] ?? '-'); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Adjust Stock Modal -->
-<div class="modal fade" id="adjustStockModal" tabindex="-1" aria-labelledby="adjustStockModalLabel" aria-hidden="true">
+<!-- Item Quantity Modal -->
+<div class="modal fade" id="itemQuantityModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="adjustStockModalLabel">Adjust Stock</h5>
+                <h5 class="modal-title">Add Item to Cart</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="/ERC-POS/handlers/inventory/adjust_stock.php" method="POST" id="adjustStockForm">
-                    <input type="hidden" id="adjust_menu_item_id" name="menu_item_id">
+                <input type="hidden" id="modal_item_id">
+                <input type="hidden" id="modal_item_name">
+                <input type="hidden" id="modal_current_stock">
+                
                     <div class="mb-3">
-                        <label for="item_name" class="form-label">Item</label>
-                        <input type="text" class="form-control" id="item_name" readonly>
+                    <label for="modal_quantity" class="form-label">Quantity</label>
+                    <input type="number" class="form-control" id="modal_quantity" min="1" value="1" required>
                     </div>
+                
                     <div class="mb-3">
-                        <label for="current_stock" class="form-label">Current Stock</label>
-                        <input type="number" class="form-control" id="current_stock" readonly>
+                    <label for="modal_unit_price" class="form-label">Unit Price</label>
+                    <div class="input-group">
+                        <span class="input-group-text">₱</span>
+                        <input type="number" class="form-control" id="modal_unit_price" min="0.01" step="0.01" value="0.00" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="new_stock" class="form-label">New Stock Level</label>
-                        <input type="number" class="form-control" id="new_stock" name="new_stock" min="0" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="adjustment_type" class="form-label">Adjustment Type</label>
-                        <select class="form-select" id="adjustment_type" name="adjustment_type">
-                            <option value="physical_count">Physical Count</option>
-                            <option value="correction">Correction</option>
-                            <option value="damage">Damaged/Expired</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="notes" class="form-label">Notes</label>
-                        <textarea class="form-control" id="adjust_notes" name="notes" rows="3" required></textarea>
-                        <small class="form-text text-muted">Please provide a reason for this adjustment</small>
-                    </div>
-                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" form="adjustStockForm" class="btn btn-primary">Save Adjustment</button>
+                <button type="button" class="btn btn-primary" id="confirmAddToCart">Add to Cart</button>
             </div>
         </div>
     </div>
@@ -524,79 +994,152 @@ function image_exists($path) {
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Category filter functionality
-    const categoryButtons = document.querySelectorAll('.category-filter button');
-    const itemContainers = document.querySelectorAll('.item-container');
-    
-    categoryButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const category = this.getAttribute('data-category');
-            
-            // Update active button
-            categoryButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Show/hide items based on category
-            itemContainers.forEach(item => {
-                if (category === 'all' || item.getAttribute('data-category') === category) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
-    });
-});
+// Initialize the cart items array
+window.cartItems = [];
 
-// Function to update notes based on adjustment type and stock change
-function updateNotes() {
-    const currentStock = parseInt(document.getElementById('current_stock').value) || 0;
-    const newStock = parseInt(document.getElementById('new_stock').value) || 0;
-    const adjustmentType = document.getElementById('adjustment_type').value;
-    const notesField = document.getElementById('adjust_notes');
+// Function to add item to cart (opens modal)
+function addToCart(itemData) {
+    // Set modal values
+    document.getElementById('modal_item_id').value = itemData.id;
+    document.getElementById('modal_item_name').value = itemData.name;
+    document.getElementById('modal_current_stock').value = itemData.currentStock;
+    document.getElementById('modal_quantity').value = 1;
+    document.getElementById('modal_unit_price').value = '';
     
-    let adjustmentDirection = '';
-    if (newStock > currentStock) {
-        adjustmentDirection = 'Increase';
-    } else if (newStock < currentStock) {
-        adjustmentDirection = 'Decrease';
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('itemQuantityModal'));
+    modal.show();
+    
+    // Focus on quantity field
+    document.getElementById('modal_quantity').focus();
+}
+
+// Function to add item to cart (after modal confirmation)
+function addItemToCart(itemId, itemName, currentStock, quantity, unitPrice) {
+    // Check if item already exists in cart
+    const existingItemIndex = window.cartItems.findIndex(item => item.id === itemId);
+    
+    if (existingItemIndex !== -1) {
+        // Update existing item
+        window.cartItems[existingItemIndex].quantity += quantity;
+        window.cartItems[existingItemIndex].unitPrice = unitPrice;
     } else {
-        adjustmentDirection = 'No change';
+        // Add new item
+        window.cartItems.push({
+            id: itemId,
+            name: itemName,
+            currentStock: currentStock,
+            quantity: quantity,
+            unitPrice: unitPrice
+        });
     }
     
-    const difference = Math.abs(newStock - currentStock);
+    // Update cart display
+    updateCartDisplay();
+}
+
+// Function to remove item from cart
+function removeFromCart(index) {
+    window.cartItems.splice(index, 1);
+    updateCartDisplay();
+}
+
+// Function to update cart display
+function updateCartDisplay() {
+    const cartContainer = document.querySelector('.cart-items');
+    const emptyCartMessage = document.querySelector('.empty-cart-message');
+    const submitButton = document.getElementById('submitStockIn');
     
-    let noteText = '';
-    switch(adjustmentType) {
-        case 'physical_count':
-            noteText = `${adjustmentDirection} by ${difference} after physical count`;
-            break;
-        case 'correction':
-            noteText = `${adjustmentDirection} by ${difference} to correct inventory error`;
-            break;
-        case 'damage':
-            noteText = `${adjustmentDirection} by ${difference} due to damaged/expired items`;
-            break;
-        case 'other':
-            noteText = `${adjustmentDirection} by ${difference} - `;
-            break;
+    // Clear current cart display
+    cartContainer.innerHTML = '';
+    
+    if (window.cartItems.length === 0) {
+        // Show empty cart message
+        cartContainer.appendChild(emptyCartMessage);
+        submitButton.disabled = true;
+    } else {
+        // Hide empty cart message and enable submit button
+        emptyCartMessage.remove();
+        submitButton.disabled = false;
+        
+        // Add items to cart display
+        window.cartItems.forEach((item, index) => {
+            const cartItem = document.createElement('div');
+            cartItem.className = 'cart-item';
+            cartItem.innerHTML = `
+                <div class="cart-item-header">
+                    <div>
+                        <div class="cart-item-name">${item.name}</div>
+                        <small class="text-muted">Current Stock: ${item.currentStock}</small>
+                    </div>
+                    <button type="button" class="btn-close" onclick="removeFromCart(${index})" aria-label="Remove item"></button>
+                </div>
+                <div class="cart-item-details">
+                    <div class="cart-item-detail">
+                        <span class="cart-item-label">Quantity:</span>
+                        <span class="cart-item-value">${item.quantity}</span>
+                    </div>
+                    <div class="cart-item-detail">
+                        <span class="cart-item-label">Unit Price:</span>
+                        <span class="cart-item-value">₱${item.unitPrice.toFixed(2)}</span>
+                    </div>
+                    <div class="cart-item-detail" style="grid-column: 1 / -1">
+                        <span class="cart-item-label">Total:</span>
+                        <span class="cart-item-value" style="color: var(--primary-color)">₱${(item.quantity * item.unitPrice).toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+            cartContainer.appendChild(cartItem);
+        });
     }
     
-    // Only set the value if the user hasn't modified it yet
-    if (!notesField.dataset.userModified) {
-        notesField.value = noteText;
+    // Update hidden input with cart items
+    document.getElementById('cart_items').value = JSON.stringify(window.cartItems);
+}
+
+// Function to clear cart
+function clearCart() {
+    if (window.cartItems.length > 0 && confirm('Are you sure you want to clear the cart?')) {
+        window.cartItems = [];
+        updateCartDisplay();
     }
 }
 
-// Add event listeners for the adjust modal
+// Set up the confirm add to cart button
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('adjustment_type').addEventListener('change', updateNotes);
-    document.getElementById('new_stock').addEventListener('input', updateNotes);
-    
-    // Track if user has modified the notes field
-    document.getElementById('adjust_notes').addEventListener('input', function() {
-        this.dataset.userModified = 'true';
+    // Initialize DataTable for recent transactions
+    $('#recentTransactionsTable').DataTable({
+        order: [[0, 'desc']],
+        pageLength: 10,
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ]
+    });
+
+    document.getElementById('confirmAddToCart').addEventListener('click', function() {
+        const itemId = document.getElementById('modal_item_id').value;
+        const itemName = document.getElementById('modal_item_name').value;
+        const currentStock = parseInt(document.getElementById('modal_current_stock').value);
+        const quantity = parseInt(document.getElementById('modal_quantity').value);
+        const unitPrice = parseFloat(document.getElementById('modal_unit_price').value);
+        
+        if (quantity <= 0) {
+            alert('Quantity must be greater than 0');
+            return;
+        }
+        
+        if (unitPrice <= 0) {
+            alert('Unit price must be greater than 0');
+            return;
+        }
+        
+        // Add item to cart
+        addItemToCart(itemId, itemName, currentStock, quantity, unitPrice);
+        
+        // Close the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('itemQuantityModal'));
+        modal.hide();
     });
 });
 
@@ -654,6 +1197,81 @@ function showItemHistory(itemData) {
         tbody.appendChild(row);
     });
 }
+
+// Initialize DataTable for recent transactions
+$(document).ready(function() {
+    // Check if DataTable is already initialized
+    let transactionsTable;
+    if (!$.fn.DataTable.isDataTable('#recentTransactionsTable')) {
+        transactionsTable = $('#recentTransactionsTable').DataTable({
+            order: [[0, 'desc']],
+            pageLength: 10,
+            dom: 'Bfrtip',
+            buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+        });
+    } else {
+        transactionsTable = $('#recentTransactionsTable').DataTable();
+    }
+
+    // Function to update summary cards
+    function updateSummaryCards(data) {
+        $('#totalTransactions').text(data.length);
+        
+        let totalItems = 0;
+        let totalCost = 0;
+        
+        data.forEach(row => {
+            totalItems += parseInt(row[2].replace(/,/g, ''));
+            totalCost += parseFloat(row[4].replace('₱', '').replace(/,/g, ''));
+        });
+        
+        $('#totalItems').text(totalItems.toLocaleString());
+        $('#totalCost').text('₱' + totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    }
+
+    // Update summary initially
+    updateSummaryCards(transactionsTable.rows().data().toArray());
+
+    // Handle filter changes
+    $('#stockInFilterForm select, #stockInFilterForm input').on('change', function() {
+        const menuItem = $('#filter_menu_item').val();
+        const dateFrom = $('#filter_date_from').val();
+        const dateTo = $('#filter_date_to').val();
+        const supplier = $('#filter_supplier').val().toLowerCase();
+
+        // Remove any existing custom filters
+        $.fn.dataTable.ext.search.pop();
+
+        // Add new custom filter
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            let valid = true;
+
+            // Menu item filter
+            if (menuItem && data[1] !== menuItem) {
+                valid = false;
+            }
+
+            // Date range filter
+            if (dateFrom || dateTo) {
+                const date = new Date(data[0]);
+                if (dateFrom && date < new Date(dateFrom)) valid = false;
+                if (dateTo && date > new Date(dateTo)) valid = false;
+            }
+
+            // Supplier filter
+            if (supplier && !data[5].toLowerCase().includes(supplier)) {
+                valid = false;
+            }
+
+            return valid;
+        });
+
+        transactionsTable.draw();
+
+        // Update summary cards with filtered data
+        updateSummaryCards(transactionsTable.rows({search: 'applied'}).data().toArray());
+    });
+});
 </script>
 
 <?php include '../../static/templates/footer.php'; ?> 

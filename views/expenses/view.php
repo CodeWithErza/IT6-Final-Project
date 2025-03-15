@@ -5,31 +5,47 @@ include __DIR__ . '/../../static/templates/header.php';
 // Get expense ID
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
+// Initialize error variable
+$error = '';
+
 if (!$id) {
-    $_SESSION['error'] = 'Invalid expense ID';
-    header('Location: /ERC-POS/views/expenses/index.php');
-    exit;
+    $error = 'Invalid expense ID';
+} else {
+    // Get expense details
+    $stmt = $conn->prepare("
+        SELECT 
+            e.*,
+            COALESCE(u1.username, 'System') as created_by_name,
+            COALESCE(u2.username, 'System') as updated_by_name
+        FROM expenses e
+        LEFT JOIN users u1 ON e.created_by = u1.id
+        LEFT JOIN users u2 ON e.updated_by = u2.id
+        WHERE e.id = ?
+    ");
+    $stmt->execute([$id]);
+    $expense = $stmt->fetch();
+
+    if (!$expense) {
+        $error = 'Expense not found';
+    }
 }
 
-// Get expense details
-$stmt = $conn->prepare("
-    SELECT 
-        e.*,
-        COALESCE(u1.username, 'System') as created_by_name,
-        COALESCE(u2.username, 'System') as updated_by_name
-    FROM expenses e
-    LEFT JOIN users u1 ON e.created_by = u1.id
-    LEFT JOIN users u2 ON e.updated_by = u2.id
-    WHERE e.id = ?
-");
-$stmt->execute([$id]);
-$expense = $stmt->fetch();
-
-if (!$expense) {
-    $_SESSION['error'] = 'Expense not found';
-    header('Location: /ERC-POS/views/expenses/index.php');
+// If there's an error, show it and provide a redirect script
+if ($error): ?>
+    <div class="container-fluid px-4">
+        <div class="alert alert-danger mt-4">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+    </div>
+    <script>
+        setTimeout(function() {
+            window.location.href = '/ERC-POS/views/expenses/index.php';
+        }, 2000); // Redirect after 2 seconds
+    </script>
+    <?php
+    include __DIR__ . '/../../static/templates/footer.php';
     exit;
-}
+endif;
 
 // Check if notes contain multiple items
 $has_multiple_items = strpos($expense['notes'], 'ITEMS INCLUDED:') !== false;

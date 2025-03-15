@@ -73,7 +73,7 @@ unset($_SESSION['success'], $_SESSION['error']);
         <i class="fas fa-file-invoice-dollar me-2"></i>
         Expenses Management
     </h1>
-    <p class="text-muted">Manage all expenses including ingredients (like eggs, spices, etc.), utilities, rent, salaries, and other operational costs. For inventory items that need stock tracking, please use the <a href="/ERC-POS/views/inventory/stock_in.php">Stock In</a> functionality.</p>
+    <p class="text-muted">Manage all expenses including ingredients (like eggs, spices, etc.), utilities, rent, salaries, and other operational costs. For inventory items that need stock tracking, please use the <a href="/ERC-POS/views/inventory/index.php">Stock Levels</a> functionality.</p>
 
     <?php if ($success): ?>
         <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
@@ -277,7 +277,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                                     <td>₱<?php echo number_format($expense['amount'], 2); ?></td>
                                     <td><?php echo htmlspecialchars($expense['created_by_name']); ?></td>
                                     <td>
-                                        <a href="/ERC-POS/views/expenses/view.php?id=<?php echo $expense['id']; ?>" class="btn btn-sm btn-info">
+                                        <a href="http://localhost/ERC-POS/views/expenses/view.php?id=<?php echo $expense['id']; ?>" class="btn btn-sm btn-info">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>
@@ -319,6 +319,136 @@ document.addEventListener('DOMContentLoaded', function() {
     const descriptionHidden = document.getElementById('description_hidden');
     const amountHidden = document.getElementById('amount_hidden');
     const itemsTotalSpan = document.getElementById('itemsTotal');
+    const expenseTypeSelect = document.getElementById('expense_type');
+    const supplierField = document.getElementById('supplier');
+    const invoiceField = document.getElementById('invoice_number');
+    const notesField = document.getElementById('notes');
+    
+    // Configure form based on expense type
+    function configureFormByExpenseType(expenseType) {
+        const config = {
+            ingredient: {
+                supplierRequired: true,
+                invoiceRequired: true,
+                supplierLabel: 'Supplier',
+                notesPlaceholder: 'Additional notes about the ingredients...',
+                itemLabel: 'Item Description',
+                itemPlaceholder: 'e.g., Eggs, Rice, Cooking Oil',
+                units: ['pcs', 'kg', 'g', 'L', 'mL', 'pack', 'box', 'sack']
+            },
+            utility: {
+                supplierRequired: true,
+                invoiceRequired: true,
+                supplierLabel: 'Service Provider',
+                notesPlaceholder: 'Additional notes about utilities...',
+                itemLabel: 'Utility Description',
+                itemPlaceholder: 'e.g., Electricity Bill, Water Bill',
+                units: ['month', 'billing']
+            },
+            salary: {
+                supplierRequired: false,
+                invoiceRequired: false,
+                supplierLabel: 'Employee Name',
+                notesPlaceholder: 'Additional notes about salary payment...',
+                itemLabel: 'Employee Name',
+                itemPlaceholder: 'Enter employee name',
+                units: ['month', 'day', 'hour']
+            },
+            rent: {
+                supplierRequired: true,
+                invoiceRequired: true,
+                supplierLabel: 'Landlord/Property Owner',
+                notesPlaceholder: 'Additional notes about rental payment...',
+                itemLabel: 'Rent Description',
+                itemPlaceholder: 'e.g., Monthly Rent, Security Deposit',
+                units: ['month', 'year']
+            },
+            equipment: {
+                supplierRequired: true,
+                invoiceRequired: true,
+                supplierLabel: 'Vendor',
+                notesPlaceholder: 'Equipment details, warranty information...',
+                itemLabel: 'Equipment Description',
+                itemPlaceholder: 'e.g., Kitchen Equipment, Furniture',
+                units: ['unit', 'set', 'pcs']
+            },
+            maintenance: {
+                supplierRequired: true,
+                invoiceRequired: true,
+                supplierLabel: 'Service Provider',
+                notesPlaceholder: 'Maintenance details, service performed...',
+                itemLabel: 'Service Description',
+                itemPlaceholder: 'e.g., Equipment Repair, Cleaning Service',
+                units: ['service', 'hour', 'day']
+            },
+            other: {
+                supplierRequired: false,
+                invoiceRequired: false,
+                supplierLabel: 'Supplier/Vendor',
+                notesPlaceholder: 'Provide details about this expense...',
+                itemLabel: 'Item Description',
+                itemPlaceholder: 'Enter item or service description',
+                units: ['pcs', 'unit', 'service']
+            }
+        };
+
+        const settings = config[expenseType];
+        
+        // Update supplier field visibility and requirements
+        if (expenseType === 'salary') {
+            supplierField.parentElement.style.display = 'none';
+            supplierField.required = false;
+            supplierField.value = '';
+        } else {
+            supplierField.parentElement.style.display = '';
+            supplierField.required = settings.supplierRequired;
+            document.querySelector('label[for="supplier"]').textContent = settings.supplierLabel;
+            supplierField.placeholder = `Enter ${settings.supplierLabel.toLowerCase()}...`;
+        }
+        
+        // Update invoice field
+        invoiceField.required = settings.invoiceRequired;
+        
+        // Update item table labels and placeholders
+        const itemDescriptionHeader = document.querySelector('#itemsTable th:first-child');
+        const itemDescriptionInputs = document.querySelectorAll('.item-description');
+        const unitSelects = document.querySelectorAll('.item-unit');
+        
+        itemDescriptionHeader.textContent = settings.itemLabel;
+        itemDescriptionInputs.forEach(input => {
+            input.placeholder = settings.itemPlaceholder;
+        });
+
+        // Update unit options
+        unitSelects.forEach(select => {
+            // Store current value
+            const currentValue = select.value;
+            // Clear existing options
+            select.innerHTML = '';
+            // Add new options
+            settings.units.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit;
+                option.textContent = unit;
+                select.appendChild(option);
+            });
+            // Try to restore previous value if it exists in new options
+            if (settings.units.includes(currentValue)) {
+                select.value = currentValue;
+            }
+        });
+        
+        // Update notes placeholder
+        notesField.placeholder = settings.notesPlaceholder;
+    }
+    
+    // Configure form on initial load
+    configureFormByExpenseType(expenseTypeSelect.value);
+    
+    // Configure form when expense type changes
+    expenseTypeSelect.addEventListener('change', function() {
+        configureFormByExpenseType(this.value);
+    });
     
     // Add new item row
     document.getElementById('addItemRow').addEventListener('click', function() {

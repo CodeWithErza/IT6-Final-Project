@@ -4,8 +4,10 @@ check_login();
 
 // Check if it's a POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $_SESSION['error'] = 'Invalid request method';
-    header('Location: /ERC-POS/views/expenses/index.php');
+    echo "<script>
+        alert('Invalid request method');
+        window.location.href = '/ERC-POS/views/expenses/index.php';
+    </script>";
     exit;
 }
 
@@ -22,7 +24,9 @@ $notes = trim($_POST['notes'] ?? '');
 // Validate required fields
 if (!$id || !$description || $amount <= 0 || !$expense_type || !$expense_date) {
     $_SESSION['error'] = 'Please fill in all required fields';
-    header('Location: /ERC-POS/views/expenses/view.php?id=' . $id);
+    echo "<script>
+        window.location.href = '/ERC-POS/views/expenses/view.php?id=" . $id . "';
+    </script>";
     exit;
 }
 
@@ -66,9 +70,8 @@ try {
             table_name,
             record_id,
             old_values,
-            new_values,
-            created_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            new_values
+        ) VALUES (?, ?, ?, ?, ?, ?)
     ");
 
     // Get old values
@@ -99,8 +102,7 @@ try {
         'expenses',
         $id,
         $old_values,
-        $new_values,
-        $_SESSION['user_id']
+        $new_values
     ]);
 
     // Commit transaction
@@ -113,6 +115,8 @@ try {
     $_SESSION['error'] = 'Error updating expense: ' . $e->getMessage();
 }
 
-// Redirect back to the expense view page
-header('Location: /ERC-POS/views/expenses/view.php?id=' . $id);
+// Redirect back to the expense view page using JavaScript
+echo "<script>
+    window.location.href = '/ERC-POS/views/expenses/view.php?id=" . $id . "';
+</script>";
 exit; 

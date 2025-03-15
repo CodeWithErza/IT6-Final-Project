@@ -135,7 +135,7 @@ unset($_SESSION['error']); // Clear the error message
                 <div class="card shadow-lg">
                     <div class="card-body">
                         <div class="text-center mb-4">
-                            <img src="/ERC-POS/assets/images/erc logo.png" alt="ERC Logo" class="mb-3 login-logo">
+                            <img src="/ERC-POS/assets/images/ERC Logo.png" alt="ERC Logo" class="mb-3 login-logo">
                             <h3 class="mb-0">ERC POS System</h3>
                         </div>
                         <?php if ($error): ?>

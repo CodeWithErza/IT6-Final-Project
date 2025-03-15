@@ -13,15 +13,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 try {
     // Validate and sanitize input
-    $description = trim($_POST['description'] ?? '');
     $expense_type = $_POST['expense_type'] ?? 'other';
-    $amount = floatval($_POST['amount'] ?? 0);
     $expense_date = $_POST['expense_date'] ?? date('Y-m-d');
     $supplier = trim($_POST['supplier'] ?? '');
     $invoice_number = trim($_POST['invoice_number'] ?? '');
     $notes = trim($_POST['notes'] ?? '');
-    $multiple_items = isset($_POST['multiple_items']);
-    $items_list = $multiple_items ? trim($_POST['items_list'] ?? '') : '';
+    $items_list = trim($_POST['items_list'] ?? '');
+    
+    // Get description and amount from items list
+    $description = trim($_POST['description'] ?? '');
+    $amount = floatval($_POST['amount'] ?? 0);
     
     // Validate required fields
     if (empty($description)) {
@@ -32,26 +33,39 @@ try {
         throw new Exception('Amount must be greater than zero');
     }
     
+    if (empty($items_list)) {
+        throw new Exception('At least one item is required');
+    }
+    
     // Validate expense type
     $valid_expense_types = ['ingredient', 'utility', 'salary', 'rent', 'equipment', 'maintenance', 'other'];
     if (!in_array($expense_type, $valid_expense_types)) {
         throw new Exception('Invalid expense type');
     }
+
+    // Validate required fields based on expense type
+    $requires_supplier = in_array($expense_type, ['ingredient', 'utility', 'rent', 'equipment', 'maintenance']);
+    $requires_invoice = in_array($expense_type, ['ingredient', 'utility', 'rent', 'equipment', 'maintenance']);
+
+    if ($requires_supplier && empty($supplier)) {
+        throw new Exception('Supplier/vendor is required for this expense type');
+    }
+
+    if ($requires_invoice && empty($invoice_number)) {
+        throw new Exception('Invoice/receipt number is required for this expense type');
+    }
     
     // Start transaction
     $conn->beginTransaction();
     
-    // If multiple items, format the notes to include the items list
-    if ($multiple_items && !empty($items_list)) {
-        // Add the items list to the notes
-        $formatted_items = "ITEMS INCLUDED:\n" . $items_list;
-        
-        // Append to existing notes or set as notes
-        if (!empty($notes)) {
-            $notes .= "\n\n" . $formatted_items;
-        } else {
-            $notes = $formatted_items;
-        }
+    // Format the notes to include the items list
+    $formatted_items = "ITEMS INCLUDED:\n" . $items_list;
+    
+    // Append to existing notes or set as notes
+    if (!empty($notes)) {
+        $notes .= "\n\n" . $formatted_items;
+    } else {
+        $notes = $formatted_items;
     }
     
     // Insert expense
@@ -94,7 +108,7 @@ try {
             'expense_type' => $expense_type,
             'amount' => $amount,
             'expense_date' => $expense_date,
-            'multiple_items' => $multiple_items ? 'Yes' : 'No'
+            'multiple_items' => 'Yes'
         ]
     );
     

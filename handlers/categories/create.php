@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../../helpers/functions.php';
+require_once '../../includes/session.php';
+require_once '../../includes/db_connect.php';
 
 // Check if user is admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
@@ -7,28 +9,43 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $_SESSION['error'] = "Invalid request method";
+    echo "<script>
+        alert('Invalid request method');
+        window.location.href = '/ERC-POS/views/settings/index.php';
+    </script>";
+    exit;
+}
+
+$name = trim($_POST['name'] ?? '');
+$is_active = isset($_POST['is_active']) ? 1 : 1; // Default to active for new categories
+
+if (empty($name)) {
+    $_SESSION['error'] = "Category name is required";
+    echo "<script>
+        alert('Category name is required');
+        window.location.href = '/ERC-POS/views/settings/index.php';
+    </script>";
+    exit;
+}
+
 try {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Invalid request method');
-    }
-
-    // Validate and sanitize input
-    $name = trim($_POST['name'] ?? '');
-
-    if (empty($name)) {
-        throw new Exception('Category name is required');
-    }
-
-    // Check if category name already exists
+    // Check if category already exists
     $stmt = $conn->prepare("SELECT COUNT(*) FROM categories WHERE name = ?");
     $stmt->execute([$name]);
     if ($stmt->fetchColumn() > 0) {
-        throw new Exception('A category with this name already exists');
+        $_SESSION['error'] = "A category with this name already exists";
+        echo "<script>
+            alert('A category with this name already exists');
+            window.location.href = '/ERC-POS/views/settings/index.php';
+        </script>";
+        exit;
     }
 
-    // Create category
-    $stmt = $conn->prepare("INSERT INTO categories (name, created_by) VALUES (?, ?)");
-    $stmt->execute([$name, $_SESSION['user_id']]);
+    // Create the category
+    $stmt = $conn->prepare("INSERT INTO categories (name, is_active) VALUES (?, ?)");
+    $stmt->execute([$name, $is_active]);
 
     // Log the action
     log_audit(
@@ -43,11 +60,15 @@ try {
         ]
     );
 
-    $_SESSION['success'] = "Category created successfully!";
-    header("Location: /ERC-POS/views/settings/index.php");
-    exit;
-} catch (Exception $e) {
+    $_SESSION['success'] = "Category created successfully";
+    echo "<script>
+        alert('Category created successfully');
+        window.location.href = '/ERC-POS/views/settings/index.php';
+    </script>";
+} catch (PDOException $e) {
     $_SESSION['error'] = "Error creating category: " . $e->getMessage();
-    header("Location: /ERC-POS/views/settings/index.php");
-    exit;
+    echo "<script>
+        alert('Error creating category: " . addslashes($e->getMessage()) . "');
+        window.location.href = '/ERC-POS/views/settings/index.php';
+    </script>";
 } 
