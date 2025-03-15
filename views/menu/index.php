@@ -22,6 +22,7 @@ $query = "
     LEFT JOIN categories c ON m.category_id = c.id
     LEFT JOIN inventory_transactions it ON m.id = it.menu_item_id
     WHERE 1=1
+    AND m.is_deleted = 0
 ";
 
 $params = [];

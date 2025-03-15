@@ -17,9 +17,9 @@ try {
         exit;
     }
 
-    // Start transaction
-    $conn->beginTransaction();
-
+    // Start transaction for order creation
+    begin_transaction('order_creation');
+    
     // Generate order number (YYYYMMDD-XXXX format) with retry mechanism
     $maxRetries = 5;
     $retryCount = 0;
@@ -96,6 +96,9 @@ try {
         throw new Exception("Failed to generate a unique order number after $maxRetries attempts");
     }
 
+    // Create savepoint before adding items
+    begin_transaction('order_items');
+    
     // Insert order items
     $stmt = $conn->prepare("
         INSERT INTO order_items (
@@ -120,10 +123,10 @@ try {
 
         // Note: Stock out functionality has been removed and replaced with a more flexible expenses system
     }
-
-    // Commit transaction
-    $conn->commit();
-
+    
+    // If we get here, everything succeeded
+    commit_transaction();
+    
     echo json_encode([
         'success' => true,
         'message' => 'Order completed successfully',
@@ -131,10 +134,8 @@ try {
     ]);
 
 } catch (Exception $e) {
-    // Rollback transaction on error
-    if ($conn->inTransaction()) {
-        $conn->rollBack();
-    }
+    // Rollback to the beginning if anything fails
+    rollback_transaction('order_creation');
     
     echo json_encode([
         'success' => false,

@@ -106,13 +106,6 @@ $users = $stmt->fetchAll();
                                             data-bs-target="#editUserModal">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <?php if ($user['id'] !== $_SESSION['user_id']): ?>
-                                        <button class="btn btn-sm btn-danger delete-user"
-                                                data-id="<?php echo $user['id']; ?>"
-                                                data-username="<?php echo htmlspecialchars($user['username']); ?>">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -217,26 +210,6 @@ $users = $stmt->fetchAll();
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteUserModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete user "<span id="delete-user-name"></span>"?</p>
-                <p class="text-danger mb-0">This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a href="#" id="confirm-delete" class="btn btn-danger">Delete User</a>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 $(document).ready(function() {
     // Initialize DataTable
@@ -259,23 +232,6 @@ $(document).ready(function() {
         $('#edit_full_name').val(fullName);
         $('#edit_role').val(role);
         $('#edit_status').val(status);
-    });
-
-    // Delete User
-    $(document).on('click', '.delete-user', function(e) {
-        e.preventDefault();
-        const id = $(this).data('id');
-        const username = $(this).data('username');
-        
-        // Set the username in the modal
-        $('#delete-user-name').text(username);
-        
-        // Update the confirm delete button's href
-        $('#confirm-delete').attr('href', `/ERC-POS/handlers/users/delete.php?id=${id}`);
-        
-        // Show the modal
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
-        deleteModal.show();
     });
 
     // Password Validation for Add User

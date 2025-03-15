@@ -63,26 +63,26 @@ try {
             $_SESSION['warning'] = $message;
         } else {
             // No references, safe to delete
-            $stmt = $conn->prepare("DELETE FROM menu_items WHERE id = ?");
-            $stmt->execute([$id]);
+        $stmt = $conn->prepare("DELETE FROM menu_items WHERE id = ?");
+        $stmt->execute([$id]);
 
-            // Delete the image file if it exists
-            if ($menu_item['image_path'] && file_exists(__DIR__ . '/../../' . $menu_item['image_path'])) {
-                unlink(__DIR__ . '/../../' . $menu_item['image_path']);
-            }
+        // Delete the image file if it exists
+        if ($menu_item['image_path'] && file_exists(__DIR__ . '/../../' . $menu_item['image_path'])) {
+            unlink(__DIR__ . '/../../' . $menu_item['image_path']);
+        }
 
-            // Log the action
-            log_audit(
-                $_SESSION['user_id'],
-                'delete',
-                'menu_items',
-                $id,
-                $menu_item,
-                null
-            );
+        // Log the action
+        log_audit(
+            $_SESSION['user_id'],
+            'delete',
+            'menu_items',
+            $id,
+            $menu_item,
+            null
+        );
 
-            $conn->commit();
-            $_SESSION['success'] = "Menu item '{$menu_item['name']}' has been deleted successfully.";
+        $conn->commit();
+        $_SESSION['success'] = "Menu item '{$menu_item['name']}' has been deleted successfully.";
         }
     } catch (Exception $e) {
         $conn->rollBack();

@@ -105,4 +105,33 @@ function get_inventory_transactions($start_date, $end_date, $menu_item_id = null
     $stmt = $conn->prepare("CALL sp_get_inventory_transactions(?, ?, ?)");
     $stmt->execute([$start_date, $end_date, $menu_item_id]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Start a new transaction with an optional savepoint
+ * @param string|null $savepoint_name Optional savepoint name
+ */
+function begin_transaction($savepoint_name = null) {
+    global $conn;
+    $stmt = $conn->prepare("CALL sp_begin_transaction(?)");
+    $stmt->execute([$savepoint_name]);
+}
+
+/**
+ * Rollback to a specific savepoint or perform a full rollback
+ * @param string|null $savepoint_name Optional savepoint name
+ */
+function rollback_transaction($savepoint_name = null) {
+    global $conn;
+    $stmt = $conn->prepare("CALL sp_rollback_to_savepoint(?)");
+    $stmt->execute([$savepoint_name]);
+}
+
+/**
+ * Commit the current transaction
+ */
+function commit_transaction() {
+    global $conn;
+    $stmt = $conn->prepare("CALL sp_commit_transaction()");
+    $stmt->execute();
 } 
