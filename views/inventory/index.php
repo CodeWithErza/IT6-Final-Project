@@ -1095,6 +1095,7 @@ function updateCartDisplay() {
     
     // Update hidden input with cart items
     document.getElementById('cart_items').value = JSON.stringify(window.cartItems);
+    console.log('Cart items updated:', window.cartItems);
 }
 
 // Function to clear cart
@@ -1271,6 +1272,43 @@ $(document).ready(function() {
         // Update summary cards with filtered data
         updateSummaryCards(transactionsTable.rows({search: 'applied'}).data().toArray());
     });
+});
+
+// Add form submission handler to validate before submit
+document.addEventListener('DOMContentLoaded', function() {
+    const stockInForm = document.getElementById('stockInForm');
+    if (stockInForm) {
+        stockInForm.addEventListener('submit', function(event) {
+            // Prevent default form submission
+            event.preventDefault();
+            
+            // Check if cart is empty
+            if (window.cartItems.length === 0) {
+                alert('Please add items to the cart before submitting.');
+                return;
+            }
+            
+            // Validate cart items
+            let isValid = true;
+            window.cartItems.forEach(item => {
+                if (!item.id || !item.quantity || !item.unitPrice) {
+                    isValid = false;
+                    console.error('Invalid item:', item);
+                }
+            });
+            
+            if (!isValid) {
+                alert('Some items in the cart are invalid. Please clear the cart and try again.');
+                return;
+            }
+            
+            // Log the cart items before submission
+            console.log('Submitting cart items:', JSON.stringify(window.cartItems));
+            
+            // Submit the form
+            this.submit();
+        });
+    }
 });
 </script>
 

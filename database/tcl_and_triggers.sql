@@ -257,4 +257,4 @@ CREATE INDEX idx_order_items_menu_item ON order_items(menu_item_id); -- Improves
 
 -- Expenses Indexes
 CREATE INDEX idx_expenses_type ON expenses(expense_type);  -- Improves expense type filtering
-CREATE INDEX idx_expenses_date ON expenses(expense_date);  -- Improves date-based reporting 
+CREATE INDEX idx_expenses_date ON expenses(expense_date);  -- Improves date-based reporting     

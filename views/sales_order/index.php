@@ -732,6 +732,21 @@ unset($_SESSION['success'], $_SESSION['error']);
             return;
         }
 
+        // Check session status before proceeding
+        try {
+            const sessionCheck = await fetch('/ERC-POS/handlers/auth/check_session.php');
+            const sessionStatus = await sessionCheck.json();
+            
+            if (!sessionStatus.logged_in) {
+                alert('Your session has expired. Please log in again.');
+                window.location.href = '/ERC-POS/views/auth/login.php';
+                return;
+            }
+        } catch (error) {
+            console.error('Session check error:', error);
+            // Continue anyway, the server will handle authentication
+        }
+
         const orderData = {
             items: Array.from(orderItems.entries()).map(([id, item]) => ({
                 menu_item_id: id,
@@ -758,7 +773,18 @@ unset($_SESSION['success'], $_SESSION['error']);
             });
 
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                // Get response text to see if there's any error message
+                const responseText = await response.text();
+                console.error('Server response:', responseText);
+                
+                // Try to parse as JSON if possible
+                try {
+                    const errorData = JSON.parse(responseText);
+                    throw new Error(errorData.error || `Server error: ${response.status} ${response.statusText}`);
+                } catch (parseError) {
+                    // If not valid JSON, use the response text or status
+                    throw new Error(`Server error: ${response.status} ${response.statusText}. Details: ${responseText.substring(0, 100)}...`);
+                }
             }
 
             const result = await response.json();
@@ -796,8 +822,24 @@ unset($_SESSION['success'], $_SESSION['error']);
                 throw new Error(result.error || 'Failed to create order');
             }
         } catch (error) {
-            alert('Error: ' + error.message);
-            console.error('Error:', error);
+            console.error('Error details:', error);
+            
+            // Create a more detailed error alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                <strong>Error:</strong> ${error.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Auto-dismiss the alert after 10 seconds
+            setTimeout(() => {
+                if (alertDiv && alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 10000);
         }
     });
 

@@ -1,5 +1,18 @@
 <?php
+// Suppress warnings and notices
+error_reporting(E_ERROR | E_PARSE);
+ini_set('display_errors', 0);
+
+// Set JSON content type header
+header('Content-Type: application/json');
+
 require_once __DIR__ . '/../../helpers/functions.php';
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'error' => 'User not authenticated. Please log in.']);
+    exit;
+}
 
 // Check if request is POST and has JSON content
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST) && empty(file_get_contents('php://input'))) {
@@ -9,11 +22,28 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST) && empty(file_get_con
 
 try {
     // Get JSON data
-    $data = json_decode(file_get_contents('php://input'), true);
+    $jsonInput = file_get_contents('php://input');
+    if (empty($jsonInput)) {
+        echo json_encode(['success' => false, 'error' => 'Empty request body']);
+        exit;
+    }
+    
+    $data = json_decode($jsonInput, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo json_encode(['success' => false, 'error' => 'Invalid JSON: ' . json_last_error_msg()]);
+        exit;
+    }
     
     // Validate required data
     if (empty($data['items'])) {
         echo json_encode(['success' => false, 'error' => 'No items in order']);
+        exit;
+    }
+
+    // Ensure user_id is available
+    $user_id = $_SESSION['user_id'];
+    if (!$user_id) {
+        echo json_encode(['success' => false, 'error' => 'User ID not found in session']);
         exit;
     }
 
@@ -73,7 +103,7 @@ try {
                 $data['change'],
                 $data['payment_method'],
                 $data['notes'],
-                $_SESSION['user_id']
+                $user_id
             ]);
             
             $orderId = $conn->lastInsertId();
@@ -106,8 +136,9 @@ try {
             menu_item_id,
             quantity,
             unit_price,
-            subtotal
-        ) VALUES (?, ?, ?, ?, ?)
+            subtotal,
+            created_by
+        ) VALUES (?, ?, ?, ?, ?, ?)
     ");
 
     // Process each item
@@ -118,7 +149,8 @@ try {
             $item['menu_item_id'],
             $item['quantity'],
             $item['unit_price'],
-            $subtotal
+            $subtotal,
+            $user_id
         ]);
 
         // Note: Stock out functionality has been removed and replaced with a more flexible expenses system
@@ -135,7 +167,13 @@ try {
 
 } catch (Exception $e) {
     // Rollback to the beginning if anything fails
-    rollback_transaction('order_creation');
+    if (isset($conn) && $conn->inTransaction()) {
+        rollback_transaction('order_creation');
+    }
+    
+    // Log the error for server-side debugging
+    $user_id_log = isset($user_id) ? $user_id : 'not set';
+    error_log("Order creation error for user $user_id_log: " . $e->getMessage() . "\n" . $e->getTraceAsString());
     
     echo json_encode([
         'success' => false,

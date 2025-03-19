@@ -30,7 +30,7 @@ if ($menu_item_id) {
 if ($date_from) {
     $query .= " AND DATE(it.created_at) >= ?";
     $params[] = $date_from;
-}
+};
 
 if ($date_to) {
     $query .= " AND DATE(it.created_at) <= ?";

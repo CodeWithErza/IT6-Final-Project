@@ -11,21 +11,21 @@ $error = '';
 if (!$id) {
     $error = 'Invalid expense ID';
 } else {
-    // Get expense details
-    $stmt = $conn->prepare("
-        SELECT 
-            e.*,
+// Get expense details
+$stmt = $conn->prepare("
+    SELECT 
+        e.*,
             COALESCE(u1.username, 'System') as created_by_name,
             COALESCE(u2.username, 'System') as updated_by_name
-        FROM expenses e
+    FROM expenses e
         LEFT JOIN users u1 ON e.created_by = u1.id
         LEFT JOIN users u2 ON e.updated_by = u2.id
-        WHERE e.id = ?
-    ");
-    $stmt->execute([$id]);
-    $expense = $stmt->fetch();
+    WHERE e.id = ?
+");
+$stmt->execute([$id]);
+$expense = $stmt->fetch();
 
-    if (!$expense) {
+if (!$expense) {
         $error = 'Expense not found';
     }
 }
@@ -80,10 +80,10 @@ if ($has_multiple_items) {
             <button type="submit" class="btn btn-success me-2" id="saveChanges" form="expenseForm" style="display: none;">
                 <i class="fas fa-save me-2"></i>Save Changes
             </button>
-            <a href="/ERC-POS/views/expenses/index.php" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Back to Expenses
-            </a>
-        </div>
+        <a href="/ERC-POS/views/expenses/index.php" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Expenses
+        </a>
+    </div>
     </div>
 
     <form id="expenseForm" action="/ERC-POS/handlers/expenses/edit.php" method="POST">
@@ -97,35 +97,35 @@ if ($has_multiple_items) {
         <input type="hidden" name="old_invoice_number" value="<?php echo htmlspecialchars($expense['invoice_number'] ?? ''); ?>">
         <input type="hidden" name="old_notes" value="<?php echo htmlspecialchars($expense['notes'] ?? ''); ?>">
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-file-invoice-dollar me-2"></i>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-file-invoice-dollar me-2"></i>
                     <span id="descriptionDisplay"><?php echo htmlspecialchars($expense['description']); ?></span>
                     <input type="text" class="form-control form-control-sm d-none editable-field" 
                            name="description" value="<?php echo htmlspecialchars($expense['description']); ?>" required>
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <table class="table table-borderless">
-                            <tr>
-                                <th width="30%">Expense Type:</th>
-                                <td>
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="30%">Expense Type:</th>
+                            <td>
                                     <span id="expenseTypeDisplay" class="badge bg-<?php 
-                                        echo match($expense['expense_type']) {
-                                            'ingredient' => 'primary',
-                                            'utility' => 'info',
-                                            'salary' => 'success',
-                                            'rent' => 'warning',
-                                            'equipment' => 'secondary',
-                                            'maintenance' => 'dark',
-                                            default => 'light text-dark'
-                                        };
-                                    ?>">
-                                        <?php echo ucfirst($expense['expense_type']); ?>
-                                    </span>
+                                    echo match($expense['expense_type']) {
+                                        'ingredient' => 'primary',
+                                        'utility' => 'info',
+                                        'salary' => 'success',
+                                        'rent' => 'warning',
+                                        'equipment' => 'secondary',
+                                        'maintenance' => 'dark',
+                                        default => 'light text-dark'
+                                    };
+                                ?>">
+                                    <?php echo ucfirst($expense['expense_type']); ?>
+                                </span>
                                     <select class="form-select form-select-sm d-none editable-field" name="expense_type" required>
                                         <?php
                                         $expense_types = ['ingredient', 'utility', 'salary', 'rent', 'equipment', 'maintenance', 'other'];
@@ -136,10 +136,10 @@ if ($has_multiple_items) {
                                         </option>
                                         <?php endforeach; ?>
                                     </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Amount:</th>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Amount:</th>
                                 <td>
                                     <span id="amountDisplay" class="fw-bold">₱<?php echo number_format($expense['amount'], 2); ?></span>
                                     <div class="input-group input-group-sm d-none editable-field">
@@ -148,23 +148,23 @@ if ($has_multiple_items) {
                                                value="<?php echo $expense['amount']; ?>" step="0.01" min="0" required>
                                     </div>
                                 </td>
-                            </tr>
-                            <tr>
-                                <th>Date:</th>
+                        </tr>
+                        <tr>
+                            <th>Date:</th>
                                 <td>
                                     <span id="dateDisplay"><?php echo date('F d, Y', strtotime($expense['expense_date'])); ?></span>
                                     <input type="date" class="form-control form-control-sm d-none editable-field" 
                                            name="expense_date" value="<?php echo date('Y-m-d', strtotime($expense['expense_date'])); ?>" required>
                                 </td>
-                            </tr>
-                            <tr>
-                                <th>Added By:</th>
-                                <td><?php echo htmlspecialchars($expense['created_by_name']); ?></td>
-                            </tr>
-                            <tr>
-                                <th>Added On:</th>
-                                <td><?php echo date('F d, Y h:i A', strtotime($expense['created_at'])); ?></td>
-                            </tr>
+                        </tr>
+                        <tr>
+                            <th>Added By:</th>
+                            <td><?php echo htmlspecialchars($expense['created_by_name']); ?></td>
+                        </tr>
+                        <tr>
+                            <th>Added On:</th>
+                            <td><?php echo date('F d, Y h:i A', strtotime($expense['created_at'])); ?></td>
+                        </tr>
                             <?php if ($expense['updated_by']): ?>
                             <tr>
                                 <th>Last Updated By:</th>
@@ -175,83 +175,83 @@ if ($has_multiple_items) {
                                 <td><?php echo date('F d, Y h:i A', strtotime($expense['updated_at'])); ?></td>
                             </tr>
                             <?php endif; ?>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <table class="table table-borderless">
-                            <tr>
-                                <th width="30%">Supplier/Vendor:</th>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="30%">Supplier/Vendor:</th>
                                 <td>
                                     <span id="supplierDisplay"><?php echo $expense['supplier'] ? htmlspecialchars($expense['supplier']) : '-'; ?></span>
                                     <input type="text" class="form-control form-control-sm d-none editable-field" 
                                            name="supplier" value="<?php echo htmlspecialchars($expense['supplier'] ?? ''); ?>">
                                 </td>
-                            </tr>
-                            <tr>
-                                <th>Invoice/Receipt:</th>
+                        </tr>
+                        <tr>
+                            <th>Invoice/Receipt:</th>
                                 <td>
                                     <span id="invoiceDisplay"><?php echo $expense['invoice_number'] ? htmlspecialchars($expense['invoice_number']) : '-'; ?></span>
                                     <input type="text" class="form-control form-control-sm d-none editable-field" 
                                            name="invoice_number" value="<?php echo htmlspecialchars($expense['invoice_number'] ?? ''); ?>">
                                 </td>
-                            </tr>
-                            <?php if (!empty($general_notes)): ?>
-                            <tr>
-                                <th>Notes:</th>
+                        </tr>
+                        <?php if (!empty($general_notes)): ?>
+                        <tr>
+                            <th>Notes:</th>
                                 <td>
                                     <span id="notesDisplay"><?php echo nl2br(htmlspecialchars($general_notes)); ?></span>
                                     <textarea class="form-control form-control-sm d-none editable-field" 
                                               name="notes" rows="3"><?php echo htmlspecialchars($expense['notes'] ?? ''); ?></textarea>
                                 </td>
-                            </tr>
-                            <?php endif; ?>
-                        </table>
-                    </div>
+                        </tr>
+                        <?php endif; ?>
+                    </table>
                 </div>
+            </div>
 
-                <?php if ($has_multiple_items && !empty($items_list)): ?>
-                <div class="row mt-4">
-                    <div class="col-12">
+            <?php if ($has_multiple_items && !empty($items_list)): ?>
+            <div class="row mt-4">
+                <div class="col-12">
                         <h5 class="border-bottom pb-2">
                             Items Included
                             <button type="button" class="btn btn-sm btn-outline-primary float-end d-none editable-field" id="addItemBtn">
                                 <i class="fas fa-plus"></i> Add Item
                             </button>
                         </h5>
-                        <div class="table-responsive">
+                    <div class="table-responsive">
                             <table class="table table-striped" id="itemsTable">
-                                <thead>
-                                    <tr>
-                                        <th width="5%">#</th>
+                            <thead>
+                                <tr>
+                                    <th width="5%">#</th>
                                         <th width="45%">Item Description</th>
-                                        <th width="20%">Quantity</th>
+                                    <th width="20%">Quantity</th>
                                         <th width="20%">Price</th>
                                         <th width="10%" class="d-none editable-field">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php 
-                                    $total_items_cost = 0;
-                                    foreach ($items_list as $index => $item): 
-                                        $price_parts = explode(' - ₱', $item);
-                                        $item_with_qty = $price_parts[0];
-                                        $price = isset($price_parts[1]) ? floatval($price_parts[1]) : null;
-                                        
-                                        $qty_match = [];
-                                        $description = $item_with_qty;
-                                        $quantity = '';
-                                        
-                                        if (preg_match('/^(.*?)\s*\((\d+\.?\d*)\s*([a-zA-Z]+)\)$/', $item_with_qty, $qty_match)) {
-                                            $description = trim($qty_match[1]);
-                                            $quantity = $qty_match[2] . ' ' . $qty_match[3];
-                                        }
-                                        
-                                        if ($price !== null) {
-                                            $total_items_cost += $price;
-                                        }
-                                    ?>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php 
+                                $total_items_cost = 0;
+                                foreach ($items_list as $index => $item): 
+                                    $price_parts = explode(' - ₱', $item);
+                                    $item_with_qty = $price_parts[0];
+                                    $price = isset($price_parts[1]) ? floatval($price_parts[1]) : null;
+                                    
+                                    $qty_match = [];
+                                    $description = $item_with_qty;
+                                    $quantity = '';
+                                    
+                                    if (preg_match('/^(.*?)\s*\((\d+\.?\d*)\s*([a-zA-Z]+)\)$/', $item_with_qty, $qty_match)) {
+                                        $description = trim($qty_match[1]);
+                                        $quantity = $qty_match[2] . ' ' . $qty_match[3];
+                                    }
+                                    
+                                    if ($price !== null) {
+                                        $total_items_cost += $price;
+                                    }
+                                ?>
                                     <tr data-index="<?php echo $index; ?>">
-                                        <td><?php echo $index + 1; ?></td>
+                                    <td><?php echo $index + 1; ?></td>
                                         <td>
                                             <span class="item-display"><?php echo htmlspecialchars($description); ?></span>
                                             <input type="text" class="form-control form-control-sm d-none editable-field item-description" 
@@ -279,22 +279,22 @@ if ($has_multiple_items) {
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                                <tfoot>
-                                    <tr class="table-secondary">
-                                        <th colspan="3" class="text-end">Total:</th>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-secondary">
+                                    <th colspan="3" class="text-end">Total:</th>
                                         <th colspan="2" id="itemsTotal">₱<?php echo number_format($total_items_cost, 2); ?></th>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
-                <?php endif; ?>
             </div>
+            <?php endif; ?>
         </div>
+    </div>
     </form>
 </div>
 

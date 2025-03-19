@@ -113,8 +113,19 @@ function get_inventory_transactions($start_date, $end_date, $menu_item_id = null
  */
 function begin_transaction($savepoint_name = null) {
     global $conn;
-    $stmt = $conn->prepare("CALL sp_begin_transaction(?)");
-    $stmt->execute([$savepoint_name]);
+    
+    if (!$conn->inTransaction()) {
+        $conn->beginTransaction();
+    }
+    
+    if ($savepoint_name !== null) {
+        try {
+            $conn->exec("SAVEPOINT " . $savepoint_name);
+        } catch (PDOException $e) {
+            error_log("Error creating savepoint: " . $e->getMessage());
+            // Continue execution even if savepoint fails
+        }
+    }
 }
 
 /**
@@ -123,8 +134,22 @@ function begin_transaction($savepoint_name = null) {
  */
 function rollback_transaction($savepoint_name = null) {
     global $conn;
-    $stmt = $conn->prepare("CALL sp_rollback_to_savepoint(?)");
-    $stmt->execute([$savepoint_name]);
+    
+    if (!$conn->inTransaction()) {
+        return; // Not in a transaction, nothing to roll back
+    }
+    
+    if ($savepoint_name !== null) {
+        try {
+            $conn->exec("ROLLBACK TO SAVEPOINT " . $savepoint_name);
+        } catch (PDOException $e) {
+            error_log("Error rolling back to savepoint: " . $e->getMessage());
+            // Fall back to full rollback
+            $conn->rollBack();
+        }
+    } else {
+        $conn->rollBack();
+    }
 }
 
 /**
@@ -132,6 +157,8 @@ function rollback_transaction($savepoint_name = null) {
  */
 function commit_transaction() {
     global $conn;
-    $stmt = $conn->prepare("CALL sp_commit_transaction()");
-    $stmt->execute();
+    
+    if ($conn->inTransaction()) {
+        $conn->commit();
+    }
 } 
