@@ -205,6 +205,27 @@ unset($_SESSION['success'], $_SESSION['error']);
     </div>
 </div>
 
+<!-- Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Order Receipt</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="receiptContent">
+                Loading...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printReceipt()">
+                    <i class="fas fa-print me-2"></i>Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Auto-submit form when filters change
 document.getElementById('status').addEventListener('change', function() {
@@ -278,212 +299,92 @@ document.querySelectorAll('.cancel-order').forEach(function(button) {
     });
 });
 
-// View Receipt
+// View receipt functionality
 document.querySelectorAll('.view-receipt').forEach(function(link) {
     link.addEventListener('click', function(e) {
         e.preventDefault();
         const orderId = this.dataset.id;
+        const modal = new bootstrap.Modal(document.getElementById('receiptModal'));
         
-        // Show loading spinner
-        const loadingSpinner = document.createElement('div');
-        loadingSpinner.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75';
-        loadingSpinner.style.zIndex = '9999';
-        loadingSpinner.innerHTML = `
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        `;
-        document.body.appendChild(loadingSpinner);
+        // Show modal with loading state
+        modal.show();
         
-        // Fetch order data
-        fetch(`/ERC-POS/handlers/orders/get_order_data.php?id=${orderId}`)
-            .then(response => response.json())
-            .then(data => {
-                // Remove loading spinner
-                document.body.removeChild(loadingSpinner);
-                
-                if (data.error) {
-                    alert(data.error);
-                    return;
-                }
-                
-                // Show receipt modal
-                showReceipt(data.order, data.items, data.settings);
+        // Fetch receipt data
+        fetch(`/ERC-POS/handlers/orders/get_receipt.php?id=${orderId}`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('receiptContent').innerHTML = html;
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.body.removeChild(loadingSpinner);
-                alert('Error loading receipt');
+                document.getElementById('receiptContent').innerHTML = 
+                    '<div class="alert alert-danger">Error loading receipt</div>';
             });
     });
 });
 
-// Function to show receipt
-function showReceipt(order, items, settings) {
-    const receiptModal = document.createElement('div');
-    receiptModal.className = 'modal fade';
-    receiptModal.id = 'dynamicReceiptModal';
+// Print receipt function
+function printReceipt() {
+    const printContent = document.getElementById('receiptContent').innerHTML;
+    const printWindow = window.open('', '_blank');
     
-    // Format date
-    const orderDate = new Date(order.created_at);
-    const formattedDate = orderDate.toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-    });
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Order Receipt</title>
+                <style>
+                    body {
+                        font-family: 'Courier New', monospace;
+                        font-size: 12px;
+                        line-height: 1.4;
+                        margin: 0;
+                        padding: 20px;
+                    }
+                    .receipt-container {
+                        width: 80mm;
+                        margin: 0 auto;
+                    }
+                    .text-center { text-align: center; }
+                    .receipt-logo { max-width: 60px; margin-bottom: 10px; }
+                    .receipt-divider { 
+                        border-top: 1px dashed #ccc;
+                        margin: 10px 0;
+                    }
+                    .receipt-table {
+                        width: 100%;
+                        margin: 10px 0;
+                        border-collapse: collapse;
+                    }
+                    .receipt-table th,
+                    .receipt-table td {
+                        text-align: left;
+                        padding: 3px;
+                    }
+                    .receipt-row {
+                        display: flex;
+                        justify-content: space-between;
+                        margin: 5px 0;
+                    }
+                    .total-row {
+                        font-weight: bold;
+                        margin: 10px 0;
+                    }
+                    @media print {
+                        body { margin: 0; padding: 0; }
+                        .receipt-container { width: 100%; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${printContent}
+            </body>
+        </html>
+    `);
     
-    // Create receipt HTML
-    receiptModal.innerHTML = `
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Order Receipt</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="receipt-content">
-                        <div class="text-center mb-3">
-                            ${settings.show_receipt_logo === '1' ? 
-                                `<img src="/ERC-POS/assets/images/ERC Logo.png" alt="Business Logo" style="max-width: 80px; margin-bottom: 10px;">` : ''}
-                            <h4>${settings.business_name || 'ERC Carinderia'}</h4>
-                            ${settings.business_address ? `<p class="mb-1">${settings.business_address}</p>` : ''}
-                            ${settings.business_phone ? `<p class="mb-1">${settings.business_phone}</p>` : ''}
-                            <p class="mb-1">Order #${order.order_number}</p>
-                            <p class="mb-1">${formattedDate}</p>
-                            <p class="mb-1">Cashier: ${order.created_by_name}</p>
-                        </div>
-                        <div class="border-top border-bottom py-3 mb-3">
-                            ${items.map(item => `
-                                <div class="d-flex justify-content-between mb-2">
-                                    <div>
-                                        <div>${item.menu_item_name}</div>
-                                        <div class="text-muted small">₱${parseFloat(item.unit_price).toFixed(2)} × ${item.quantity}</div>
-                                    </div>
-                                    <div>₱${parseFloat(item.subtotal).toFixed(2)}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Subtotal:</span>
-                                <span>₱${parseFloat(order.subtotal_amount).toFixed(2)}</span>
-                            </div>
-                            ${parseFloat(order.discount_amount) > 0 ? `
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>Discount ${order.discount_type ? `(${order.discount_type})` : ''}:</span>
-                                    <span>-₱${parseFloat(order.discount_amount).toFixed(2)}</span>
-                                </div>
-                            ` : ''}
-                            <div class="d-flex justify-content-between mb-2">
-                                <strong>Total:</strong>
-                                <strong>₱${parseFloat(order.total_amount).toFixed(2)}</strong>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Amount Received:</span>
-                                <span>₱${parseFloat(order.cash_received).toFixed(2)}</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Change:</span>
-                                <span>₱${parseFloat(order.cash_change).toFixed(2)}</span>
-                            </div>
-                        </div>
-                        <div class="text-center">
-                            <p class="mb-1">${settings.receipt_footer || 'Thank you for your business!'}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="printReceiptBtn">
-                        <i class="fas fa-print me-2"></i>Print Receipt
-                    </button>
-                    <a href="/ERC-POS/views/orders/view.php?id=${order.id}" class="btn btn-info" target="_blank">
-                        <i class="fas fa-external-link-alt me-2"></i>View Full Details
-                    </a>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(receiptModal);
-    
-    const modal = new bootstrap.Modal(receiptModal);
-    modal.show();
-    
-    // Print receipt
-    document.getElementById('printReceiptBtn').addEventListener('click', function() {
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Order Receipt</title>
-                    <style>
-                        body {
-                            font-family: 'Courier New', monospace;
-                            font-size: 12px;
-                            line-height: 1.4;
-                            margin: 0;
-                            padding: 20px;
-                        }
-                        .receipt-container {
-                            width: 80mm;
-                            margin: 0 auto;
-                        }
-                        .text-center {
-                            text-align: center;
-                        }
-                        .mb-1 {
-                            margin-bottom: 5px;
-                        }
-                        .mb-2 {
-                            margin-bottom: 10px;
-                        }
-                        .mb-3 {
-                            margin-bottom: 15px;
-                        }
-                        .py-3 {
-                            padding-top: 15px;
-                            padding-bottom: 15px;
-                        }
-                        .border-top {
-                            border-top: 1px dashed #ccc;
-                        }
-                        .border-bottom {
-                            border-bottom: 1px dashed #ccc;
-                        }
-                        .d-flex {
-                            display: flex;
-                        }
-                        .justify-content-between {
-                            justify-content: space-between;
-                        }
-                        .text-muted {
-                            color: #6c757d;
-                        }
-                        .small {
-                            font-size: 10px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="receipt-container">
-                        ${document.getElementById('receipt-content').innerHTML}
-                    </div>
-                </body>
-            </html>
-        `);
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-    });
-    
-    receiptModal.addEventListener('hidden.bs.modal', function() {
-        document.body.removeChild(receiptModal);
-    });
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
 }
 
 // Add print styles

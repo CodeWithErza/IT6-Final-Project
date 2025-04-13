@@ -134,7 +134,7 @@ foreach ($orders as $order) {
                         <?php foreach ($orders as $order): ?>
                             <tr>
                                 <td>
-                                    <a href="/views/orders/view.php?id=<?php echo $order['id']; ?>" class="text-primary">
+                                    <a href="#" class="text-decoration-none view-receipt" data-id="<?php echo $order['id']; ?>">
                                         <?php echo htmlspecialchars($order['order_number']); ?>
                                     </a>
                                 </td>
@@ -160,6 +160,27 @@ foreach ($orders as $order) {
     </div>
 </div>
 
+<!-- Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Order Receipt</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="receiptContent">
+                Loading...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printReceipt()">
+                    <i class="fas fa-print me-2"></i>Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize DataTable
@@ -171,6 +192,117 @@ document.addEventListener('DOMContentLoaded', function() {
             'copy', 'csv', 'excel', 'pdf', 'print'
         ]
     });
+
+    // View receipt functionality
+    document.querySelectorAll('.view-receipt').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const orderId = this.dataset.id;
+            const modal = new bootstrap.Modal(document.getElementById('receiptModal'));
+            
+            // Show modal with loading state
+            modal.show();
+            
+            // Fetch receipt data
+            fetch(`/ERC-POS/handlers/orders/get_receipt.php?id=${orderId}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('receiptContent').innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('receiptContent').innerHTML = 
+                        '<div class="alert alert-danger">Error loading receipt</div>';
+                });
+        });
+    });
+
+    // Print receipt function
+    window.printReceipt = function() {
+        const printContent = document.getElementById('receiptContent').innerHTML;
+        const printWindow = window.open('', '_blank');
+        
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Order Receipt</title>
+                    <style>
+                        body {
+                            font-family: 'Courier New', monospace;
+                            font-size: 12px;
+                            line-height: 1.4;
+                            margin: 0;
+                            padding: 20px;
+                        }
+                        .receipt-container {
+                            width: 80mm;
+                            margin: 0 auto;
+                        }
+                        .text-center { text-align: center; }
+                        .receipt-logo { max-width: 60px; margin-bottom: 10px; }
+                        .receipt-divider { 
+                            border-top: 1px dashed #ccc;
+                            margin: 10px 0;
+                        }
+                        .receipt-table {
+                            width: 100%;
+                            margin: 10px 0;
+                            border-collapse: collapse;
+                        }
+                        .receipt-table th,
+                        .receipt-table td {
+                            text-align: left;
+                            padding: 3px;
+                        }
+                        .receipt-row {
+                            display: flex;
+                            justify-content: space-between;
+                            margin: 5px 0;
+                        }
+                        .total-row {
+                            font-weight: bold;
+                            margin: 10px 0;
+                        }
+                        @media print {
+                            body { margin: 0; padding: 0; }
+                            .receipt-container { width: 100%; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printContent}
+                </body>
+            </html>
+        `);
+        
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+    };
+
+    // Add print styles
+    const printStyles = document.createElement('style');
+    printStyles.textContent = `
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #receiptModal .modal-content * {
+                visibility: visible;
+            }
+            #receiptModal .modal-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            #receiptModal .modal-footer {
+                display: none;
+            }
+        }
+    `;
+    document.head.appendChild(printStyles);
 });
 </script>
 

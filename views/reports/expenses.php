@@ -106,7 +106,8 @@ foreach ($inventory_expenses as $expense) {
         'source' => 'inventory',
         'details' => [
             'quantity' => $expense['quantity'],
-            'unit_price' => $expense['unit_price'] ?? 0
+            'unit_price' => $expense['unit_price'] ?? 0,
+            'item_name' => $expense['item_name']
         ]
     ];
 }
@@ -249,12 +250,8 @@ usort($all_expenses, function($a, $b) {
                                     <?php echo htmlspecialchars($expense['description']); ?>
                                     <?php if ($expense['source'] === 'inventory'): ?>
                                         <small class="d-block text-muted">
-                                            Qty: <?php echo number_format($expense['details']['quantity']); ?> × 
+                                            <?php echo number_format($expense['details']['quantity']); ?> × 
                                             ₱<?php echo number_format($expense['details']['unit_price'], 2); ?>
-                                        </small>
-                                    <?php elseif ($expense['details']['has_items']): ?>
-                                        <small class="d-block text-muted">
-                                            <i class="fas fa-list-ul"></i> Multiple items
                                         </small>
                                     <?php endif; ?>
                                 </td>
@@ -275,7 +272,7 @@ usort($all_expenses, function($a, $b) {
                                         <?php echo ucfirst(str_replace('_', ' ', $expense['type'])); ?>
                                     </span>
                                     <small class="d-block text-muted mt-1">
-                                        <?php echo $expense['source'] === 'inventory' ? 'Inventory' : 'General'; ?>
+                                        <?php echo ucfirst($expense['source']); ?>
                                     </small>
                                 </td>
                                 <td class="text-end">₱<?php echo number_format($expense['amount'], 2); ?></td>
@@ -283,24 +280,36 @@ usort($all_expenses, function($a, $b) {
                                 <td><?php echo htmlspecialchars($expense['invoice'] ?: '-'); ?></td>
                                 <td><?php echo htmlspecialchars($expense['created_by']); ?></td>
                                 <td>
-                                    <?php if ($expense['source'] === 'general'): ?>
-                                        <a href="http://localhost/ERC-POS/views/expenses/view.php?id=<?php echo $expense['id']; ?>" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    <?php else: ?>
-                                        <button type="button" class="btn btn-sm btn-secondary" 
-                                                data-bs-toggle="popover" 
-                                                data-bs-trigger="focus" 
-                                                title="Notes" 
-                                                data-bs-content="<?php echo htmlspecialchars($expense['notes'] ?: 'No notes available'); ?>">
-                                            <i class="fas fa-sticky-note"></i>
-                                        </button>
-                                    <?php endif; ?>
+                                    <a href="#" class="btn btn-sm btn-info view-expense" 
+                                       data-expense='<?php echo json_encode($expense); ?>'>
+                                        <i class="fas fa-eye"></i>
+                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Expense Details Modal -->
+<div class="modal fade" id="expenseModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Expense Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="expenseContent">
+                Loading...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printExpense()">
+                    <i class="fas fa-print me-2"></i>Print
+                </button>
             </div>
         </div>
     </div>
@@ -323,6 +332,76 @@ document.addEventListener('DOMContentLoaded', function() {
     var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl)
     });
+
+    // View expense details
+    document.querySelectorAll('.view-expense').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const expenseData = JSON.parse(this.dataset.expense);
+            const modal = new bootstrap.Modal(document.getElementById('expenseModal'));
+            
+            // Show modal with loading state
+            modal.show();
+            
+            // Send expense data to handler
+            fetch('/ERC-POS/handlers/reports/get_expense_report.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'expense=' + encodeURIComponent(JSON.stringify(expenseData))
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('expenseContent').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('expenseContent').innerHTML = 
+                    '<div class="alert alert-danger">Error loading expense details</div>';
+            });
+        });
+    });
+
+    // Print expense function
+    window.printExpense = function() {
+        const printContent = document.getElementById('expenseContent').innerHTML;
+        const printWindow = window.open('', '_blank');
+        
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Expense Record</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        body {
+                            font-family: 'Courier New', monospace;
+                            font-size: 12px;
+                            line-height: 1.4;
+                            margin: 0;
+                            padding: 20px;
+                        }
+                        @media print {
+                            body { margin: 0; padding: 0; }
+                            .receipt-container { width: 100%; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printContent}
+                </body>
+            </html>
+        `);
+        
+        printWindow.document.close();
+        printWindow.focus();
+        
+        // Wait for Bootstrap styles to load
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
+    };
 });
 </script>
 

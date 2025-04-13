@@ -277,7 +277,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                                     <td>₱<?php echo number_format($expense['amount'], 2); ?></td>
                                     <td><?php echo htmlspecialchars($expense['created_by_name']); ?></td>
                                     <td>
-                                        <a href="http://localhost/ERC-POS/views/expenses/view.php?id=<?php echo $expense['id']; ?>" class="btn btn-sm btn-info">
+                                        <a href="http://localhost/ERC-POS/views/expenses/view.php?id=<?php echo $expense['id']; ?>" class="btn btn-sm btn-info view-expense" data-id="<?php echo $expense['id']; ?>">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>
@@ -292,22 +292,37 @@ unset($_SESSION['success'], $_SESSION['error']);
             <?php if ($total_pages > 1): ?>
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
-                        <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
-                            <a class="page-link" href="?page=<?php echo $page - 1; ?>&expense_type=<?php echo urlencode($expense_type); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>&search=<?php echo urlencode($search); ?>">Previous</a>
-                        </li>
-                        
-                        <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                            <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                                <a class="page-link" href="?page=<?php echo $i; ?>&expense_type=<?php echo urlencode($expense_type); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>&search=<?php echo urlencode($search); ?>"><?php echo $i; ?></a>
+                        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                            <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                <a class="page-link" href="?page=<?php echo $i; ?>&expense_type=<?php echo urlencode($expense_type); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>&search=<?php echo urlencode($search); ?>">
+                                    <?php echo $i; ?>
+                                </a>
                             </li>
                         <?php endfor; ?>
-                        
-                        <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
-                            <a class="page-link" href="?page=<?php echo $page + 1; ?>&expense_type=<?php echo urlencode($expense_type); ?>&date_from=<?php echo urlencode($date_from); ?>&date_to=<?php echo urlencode($date_to); ?>&search=<?php echo urlencode($search); ?>">Next</a>
-                        </li>
                     </ul>
                 </nav>
             <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Expense Receipt Modal -->
+<div class="modal fade" id="expenseModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Expense Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="expenseContent">
+                Loading...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printExpense()">
+                    <i class="fas fa-print me-2"></i>Print
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -602,6 +617,129 @@ document.addEventListener('DOMContentLoaded', function() {
     calculateTotal();
     generateDescription();
 });
+
+// View expense details
+document.querySelectorAll('.view-expense').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const expenseId = this.dataset.id;
+        const modal = new bootstrap.Modal(document.getElementById('expenseModal'));
+        
+        // Show modal with loading state
+        modal.show();
+        
+        // Fetch expense data
+        fetch(`/ERC-POS/handlers/expenses/get_expense.php?id=${expenseId}`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('expenseContent').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('expenseContent').innerHTML = 
+                    '<div class="alert alert-danger">Error loading expense details</div>';
+            });
+    });
+});
+
+// Print expense function
+function printExpense() {
+    const printContent = document.getElementById('expenseContent').innerHTML;
+    const printWindow = window.open('', '_blank');
+    
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Expense Record</title>
+                <style>
+                    body {
+                        font-family: 'Courier New', monospace;
+                        font-size: 12px;
+                        line-height: 1.4;
+                        margin: 0;
+                        padding: 20px;
+                    }
+                    .receipt-container {
+                        width: 80mm;
+                        margin: 0 auto;
+                    }
+                    .text-center { text-align: center; }
+                    .receipt-logo { max-width: 60px; margin-bottom: 10px; }
+                    .receipt-divider { 
+                        border-top: 1px dashed #ccc;
+                        margin: 10px 0;
+                    }
+                    .receipt-table {
+                        width: 100%;
+                        margin: 10px 0;
+                        border-collapse: collapse;
+                    }
+                    .receipt-table th,
+                    .receipt-table td {
+                        text-align: left;
+                        padding: 3px;
+                    }
+                    .receipt-row {
+                        display: flex;
+                        justify-content: space-between;
+                        margin: 5px 0;
+                    }
+                    .total-row {
+                        font-weight: bold;
+                        margin: 10px 0;
+                    }
+                    .mb-1 { margin-bottom: 5px; }
+                    .mb-2 { margin-bottom: 10px; }
+                    .mb-3 { margin-bottom: 15px; }
+                    .mt-3 { margin-top: 15px; }
+                    .py-3 { padding: 15px 0; }
+                    .border-top { border-top: 1px dashed #ccc; }
+                    .border-bottom { border-bottom: 1px dashed #ccc; }
+                    .text-muted { color: #666; }
+                    .small { font-size: 0.9em; }
+                    .bg-light { background-color: #f8f9fa; }
+                    .rounded { border-radius: 4px; }
+                    .p-2 { padding: 8px; }
+                    @media print {
+                        body { margin: 0; padding: 0; }
+                        .receipt-container { width: 100%; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${printContent}
+            </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+}
+
+// Add print styles
+const printStyles = document.createElement('style');
+printStyles.textContent = `
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #expenseModal .modal-content * {
+            visibility: visible;
+        }
+        #expenseModal .modal-content {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        #expenseModal .modal-footer {
+            display: none;
+        }
+    }
+`;
+document.head.appendChild(printStyles);
 </script>
 
 <?php include __DIR__ . '/../../static/templates/footer.php'; ?> 

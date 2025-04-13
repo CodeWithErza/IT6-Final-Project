@@ -58,14 +58,73 @@ A comprehensive Point of Sale (POS) system for ERC Carinderia, featuring invento
 - Structured with MVC-inspired architecture
 - Secure authentication and authorization system
 
-## Installation
+## Installation Guide
 
-1. Clone the repository to your web server directory
-2. Import the database schema from `database/erc_pos.sql`
-3. Configure database connection in `helpers/database.php`
-4. Access the system through your web browser
-5. Login with default admin credentials (username: admin, password: admin123)
+### Prerequisites
+
+1. Install XAMPP (version 7.4 or higher)
+   - Download from: https://www.apachefriends.org/download.html
+   - Install with default settings
+
+### Installation Steps
+
+1. Extract the compressed folder
+2. Copy the `ERC-POS` folder to `C:\xampp\htdocs\`
+3. Start XAMPP Control Panel
+
+   - Start Apache
+   - Start MySQL
+
+4. Database Setup
+
+   - Open your browser and go to: http://localhost/phpmyadmin
+   - Create a new database named `erc_pos`
+   - Select the `erc_pos` database
+   - Click on "Import" in the top menu
+   - Import the following SQL files in this order:
+     1. `database/erc_pos.sql`
+     2. `database/stored_procedures.sql`
+     3. `database/tcl_and_triggers.sql`
+     4. `database/update_procedures.sql`
+
+5. Access the System
+   - Open your browser
+   - Go to: http://localhost/ERC-POS
+   - Login using these credentials:
+     - Email: admin@gmail.com
+     - Password: admin123
+
+### Troubleshooting
+
+- If you get a database connection error:
+
+  1. Check if MySQL is running in XAMPP Control Panel
+  2. Verify database name is `erc_pos`
+  3. Verify database user is `root` with no password
+
+- If images don't appear:
+  1. Make sure the `uploads` folder has write permissions
+  2. Check if all image files are properly copied
+
+### File Structure
+
+- `database/` - Contains all SQL files for database setup
+- `uploads/` - Contains uploaded images and files
+- `views/` - Contains all page templates
+- `handlers/` - Contains PHP processing scripts
+- `assets/` - Contains static files (CSS, JS, images)
+
+### Notes
+
+- The system uses a local MySQL database with default XAMPP settings
+- Default database configuration:
+  - Host: localhost
+  - User: root
+  - Password: (empty)
+  - Database: erc_pos
+
+For any issues, please contact the development team.
 
 ## License
 
-This project is proprietary software developed for ERC Carinderia. 
+This project is proprietary software developed for ERC Carinderia.

@@ -740,7 +740,7 @@ function image_exists($path) {
             </div>
                 <div class="cart-items">
                     <!-- Cart items will be added here dynamically -->
-                    <div class="empty-cart-message">
+                    <div class="empty-cart-message" id="emptyCartMessage">
                         <i class="fas fa-shopping-cart"></i>
                         <p>No items in cart. Click "Add Stock" on any item to add it to the cart.</p>
                     </div>
@@ -749,13 +749,13 @@ function image_exists($path) {
                 <!-- Transaction Form -->
                 <div class="transaction-form">
                     <form id="stockInForm" action="/ERC-POS/handlers/inventory/add_stock.php" method="POST">
-                        <input type="hidden" id="cart_items" name="cart_items" value="">
+                        <input type="hidden" id="cart_items" name="cart_items" value="[]">
                         
                         <div class="form-group">
                             <label for="transaction_date">Transaction Date</label>
                             <input type="datetime-local" class="form-control" id="transaction_date" name="transaction_date" 
                                    value="<?php echo date('Y-m-d\TH:i'); ?>" required>
-                    </div>
+                        </div>
                         
                         <div class="row">
                         <div class="col-md-6">
@@ -784,7 +784,7 @@ function image_exists($path) {
                             <button type="button" class="btn btn-outline-secondary" onclick="clearCart()">
                                 <i class="fas fa-trash me-2"></i>Clear Cart
                             </button>
-                    </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -1040,14 +1040,20 @@ function addItemToCart(itemId, itemName, currentStock, quantity, unitPrice) {
 
 // Function to remove item from cart
 function removeFromCart(index) {
-    window.cartItems.splice(index, 1);
-    updateCartDisplay();
+    if (index >= 0 && index < window.cartItems.length) {
+        console.log('Removing item at index:', index);
+        window.cartItems.splice(index, 1);
+        updateCartDisplay();
+        console.log('Updated cart after removal:', window.cartItems);
+    } else {
+        console.error('Invalid index for removal:', index);
+    }
 }
 
 // Function to update cart display
 function updateCartDisplay() {
     const cartContainer = document.querySelector('.cart-items');
-    const emptyCartMessage = document.querySelector('.empty-cart-message');
+    const emptyCartMessage = document.getElementById('emptyCartMessage');
     const submitButton = document.getElementById('submitStockIn');
     
     // Clear current cart display
@@ -1055,37 +1061,48 @@ function updateCartDisplay() {
     
     if (window.cartItems.length === 0) {
         // Show empty cart message
-        cartContainer.appendChild(emptyCartMessage);
+        if (!document.getElementById('emptyCartMessage')) {
+            const newEmptyMessage = document.createElement('div');
+            newEmptyMessage.className = 'empty-cart-message';
+            newEmptyMessage.id = 'emptyCartMessage';
+            newEmptyMessage.innerHTML = `
+                <i class="fas fa-shopping-cart"></i>
+                <p>No items in cart. Click "Add Stock" on any item to add it to the cart.</p>
+            `;
+            cartContainer.appendChild(newEmptyMessage);
+        } else {
+            cartContainer.appendChild(emptyCartMessage);
+        }
         submitButton.disabled = true;
     } else {
         // Hide empty cart message and enable submit button
-        emptyCartMessage.remove();
+        if (emptyCartMessage) {
+            emptyCartMessage.remove();
+        }
         submitButton.disabled = false;
         
-        // Add items to cart display
+        // Add items to cart display with new minimalist design
         window.cartItems.forEach((item, index) => {
             const cartItem = document.createElement('div');
-            cartItem.className = 'cart-item';
+            cartItem.className = 'cart-item border-start border-4 border-primary rounded-2 mb-2 bg-light p-2';
+            cartItem.setAttribute('data-index', index);
             cartItem.innerHTML = `
-                <div class="cart-item-header">
-                    <div>
-                        <div class="cart-item-name">${item.name}</div>
-                        <small class="text-muted">Current Stock: ${item.currentStock}</small>
-                    </div>
-                    <button type="button" class="btn-close" onclick="removeFromCart(${index})" aria-label="Remove item"></button>
-                </div>
-                <div class="cart-item-details">
-                    <div class="cart-item-detail">
-                        <span class="cart-item-label">Quantity:</span>
-                        <span class="cart-item-value">${item.quantity}</span>
-                    </div>
-                    <div class="cart-item-detail">
-                        <span class="cart-item-label">Unit Price:</span>
-                        <span class="cart-item-value">₱${item.unitPrice.toFixed(2)}</span>
-                    </div>
-                    <div class="cart-item-detail" style="grid-column: 1 / -1">
-                        <span class="cart-item-label">Total:</span>
-                        <span class="cart-item-value" style="color: var(--primary-color)">₱${(item.quantity * item.unitPrice).toFixed(2)}</span>
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mb-0 fw-semibold text-truncate" style="max-width: 180px;" title="${item.name}">${item.name}</h6>
+                            <button type="button" class="btn-close ms-2" style="font-size: 0.75rem;" onclick="removeFromCart(${index})" aria-label="Remove item"></button>
+                        </div>
+                        <div class="text-muted small mb-1">Current Stock: ${item.currentStock}</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="small">
+                                <span class="text-muted">Qty:</span> ${item.quantity} × 
+                                <span class="text-muted">₱</span>${item.unitPrice.toFixed(2)}
+                            </div>
+                            <div class="fw-semibold text-primary">
+                                ₱${(item.quantity * item.unitPrice).toFixed(2)}
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1095,7 +1112,6 @@ function updateCartDisplay() {
     
     // Update hidden input with cart items
     document.getElementById('cart_items').value = JSON.stringify(window.cartItems);
-    console.log('Cart items updated:', window.cartItems);
 }
 
 // Function to clear cart
@@ -1302,13 +1318,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Make sure the cart_items hidden field is updated with the latest cart data
+            document.getElementById('cart_items').value = JSON.stringify(window.cartItems);
+            
             // Log the cart items before submission
-            console.log('Submitting cart items:', JSON.stringify(window.cartItems));
+            console.log('Submitting cart items:', document.getElementById('cart_items').value);
             
             // Submit the form
             this.submit();
         });
     }
+    
+    // Make sure the cart display is updated when the page loads
+    updateCartDisplay();
 });
 </script>
 

@@ -21,7 +21,21 @@ $cart_items_json = $_POST['cart_items'] ?? '';
 // Log the raw cart items JSON for debugging
 error_log("Raw cart items JSON: " . $cart_items_json);
 
+// Additional validation for JSON format
+if (empty($cart_items_json)) {
+    $_SESSION['error'] = 'No items provided - cart data is empty';
+    header('Location: /ERC-POS/views/inventory/index.php');
+    exit;
+}
+
+// Decode JSON with error handling
 $cart_items = json_decode($cart_items_json, true);
+if (json_last_error() !== JSON_ERROR_NONE) {
+    $_SESSION['error'] = 'Invalid cart data format: ' . json_last_error_msg();
+    error_log("JSON decode error: " . json_last_error_msg() . " - Raw data: " . $cart_items_json);
+    header('Location: /ERC-POS/views/inventory/index.php');
+    exit;
+}
 
 // Log the decoded cart items for debugging
 error_log("Decoded cart items: " . print_r($cart_items, true));
@@ -34,7 +48,7 @@ $notes = $_POST['notes'] ?? '';
 
 // Validate cart items
 if (empty($cart_items) || !is_array($cart_items)) {
-    $_SESSION['error'] = 'No items in cart';
+    $_SESSION['error'] = 'No items in cart or invalid cart format';
     header('Location: /ERC-POS/views/inventory/index.php');
     exit;
 }
@@ -52,9 +66,17 @@ try {
         $quantity = $item['quantity'] ?? 0;
         $unit_price = $item['unitPrice'] ?? 0;
 
-        // Validate item data
-        if (empty($menu_item_id) || !is_numeric($quantity) || $quantity <= 0 || !is_numeric($unit_price) || $unit_price < 0) {
-            throw new Exception('Invalid item data: ' . print_r($item, true));
+        // Validate item data with more specific error messages
+        if (empty($menu_item_id)) {
+            throw new Exception('Missing item ID for one or more items');
+        }
+        
+        if (!is_numeric($quantity) || $quantity <= 0) {
+            throw new Exception('Invalid quantity for item: ' . ($item['name'] ?? 'Unknown Item'));
+        }
+        
+        if (!is_numeric($unit_price) || $unit_price < 0) {
+            throw new Exception('Invalid unit price for item: ' . ($item['name'] ?? 'Unknown Item'));
         }
 
         // Insert inventory transaction directly
@@ -87,10 +109,12 @@ try {
         // Update menu item stock
         $stmt = $conn->prepare("
             UPDATE menu_items 
-            SET current_stock = current_stock + ? 
+            SET current_stock = current_stock + ?,
+                updated_at = NOW(),
+                updated_by = ?
             WHERE id = ?
         ");
-        $stmt->execute([$quantity, $menu_item_id]);
+        $stmt->execute([$quantity, $_SESSION['user_id'], $menu_item_id]);
 
         // Update totals
         $total_items += $quantity;
