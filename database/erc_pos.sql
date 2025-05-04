@@ -196,13 +196,4 @@ INSERT INTO categories (name) VALUES
 
 -- Insert default admin user (password: admin123)
 INSERT INTO users (username, password, full_name, role) 
-VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'System Admin', 'admin');
-
--- Create default admin user
-INSERT INTO users (username, password, role) 
-VALUES ('admin', '$2y$10$8WxhGX9kqD.XF8H1ZUKdxOyj7scq.3QuYwFR8ZkLYaWyZnzIzxhHi', 'admin')
-ON DUPLICATE KEY UPDATE password = '$2y$10$8WxhGX9kqD.XF8H1ZUKdxOyj7scq.3QuYwZnzIzxhHi';
-
--- Note: This creates an admin user with:
--- Username: admin
--- Password: admin123 
+VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'System Admin', 'admin'); 
