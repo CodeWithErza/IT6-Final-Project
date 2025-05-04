@@ -11,7 +11,7 @@
                         <small>&copy; <?php echo date('Y'); ?> ERC-POS System. All rights reserved.</small>
                     </p>
                     <p class="mb-0 text-muted">
-                        <small>Developed by: Dumangcas, Era G. | Diog, Casandra Ella V. | Dolino, Ryle Joshua E.</small>
+                        <small>Developed by: Dumangcas, Era G. | Indino, Jun Antoni Reus | Pesquera, Silk Echo C.</small>
                     </p>
                 </div>
             </div>

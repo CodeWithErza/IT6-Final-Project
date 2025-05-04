@@ -15,7 +15,7 @@ $categories = $stmt->fetchAll();
 $stmt = $conn->prepare("CALL sp_get_menu_items_for_sale()");
 $stmt->execute();
 $menu_items = $stmt->fetchAll();
-$stmt->closeCursor(); // Important to close the cursor to allow subsequent queries
+$stmt->closeCursor();
 
 // Get business settings for receipt
 $stmt = $conn->prepare("
